@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="transition-colors duration-500">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- Cor da barra do navegador no mobile -->
+    <meta name="theme-color" content="#6366f1">
+    <title>EcoKids - Contos Mágicos</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class', // Habilita o modo escuro por classe
+            theme: {
+                extend: {}
+            }
+        }
+    </script>
+    
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <style>
+        /* Fundo animado suave */
+        body { 
+            background-size: 200% 200%;
+            animation: gradientMove 15s ease infinite;
+            min-height: 100vh;
+            -webkit-tap-highlight-color: transparent; /* Remove flash azul no toque do iOS */
+        }
+        
+        .bg-light-mode { background-image: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+        .bg-dark-mode { background-image: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .pulse { animation: pulse-animation 1.5s infinite; }
+        @keyframes pulse-animation {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+    </style>
+</head>
+<body class="bg-light-mode flex flex-col items-center justify-center p-4 md:p-6 font-sans text-gray-800 transition-all duration-700">
+
+    <div class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md p-6 md:p-8 rounded-3xl shadow-xl max-w-2xl w-full text-center border border-white/20 dark:border-slate-700/50 transition-all duration-700">
+        
+        <!-- Cabeçalho com Botão Dark Mode -->
+        <div class="flex justify-between items-center mb-6">
+            <div class="w-10"></div> <!-- Espaçador para centralizar o título -->
+            <h1 class="text-3xl md:text-4xl font-bold text-indigo-600 dark:text-indigo-400 tracking-tight">EcoKids 🪄</h1>
+            <button id="btn-theme" class="w-10 h-10 flex items-center justify-center rounded-full bg-indigo-100 dark:bg-slate-800 text-indigo-600 dark:text-yellow-400 hover:scale-110 transition-transform">
+                <svg id="icon-moon" class="w-5 h-5 block dark:hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                <svg id="icon-sun" class="w-5 h-5 hidden dark:block" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path></svg>
+            </button>
+        </div>
+
+        <p class="text-gray-600 dark:text-gray-300 mb-6 font-medium" id="subtitle">Leia a história em voz alta e veja a magia acontecer!</p>
+
+        <!-- Área de Feedback Visual Interativo (Cresce no modo imersivo) -->
+        <div id="anima-area" class="h-48 flex items-center justify-center mb-6 bg-indigo-50 dark:bg-slate-800 rounded-2xl border-2 border-indigo-100 dark:border-slate-700 overflow-hidden relative shadow-inner transition-all duration-700 ease-in-out">
+            <span id="emoji-display" class="text-8xl md:text-9xl opacity-0 transform scale-50">✨</span>
+            <div id="listening-indicator" class="absolute bottom-3 right-3 flex items-center gap-2 opacity-0 transition-opacity duration-500">
+                <span class="flex h-3 w-3 relative">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                </span>
+                <span class="text-xs font-bold text-red-500 dark:text-red-400 uppercase tracking-widest">Ouvindo</span>
+            </div>
+        </div>
+        
+        <!-- ELEMENTOS NÃO IMERSIVOS (Escondidos durante a leitura para focar na história) -->
+        <div id="immersive-elements" class="transition-all duration-500 overflow-hidden">
+            <!-- Texto de Teste -->
+            <div class="bg-yellow-50 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 p-4 rounded-xl text-sm mb-6 text-left border border-yellow-200 dark:border-yellow-700/50 shadow-sm">
+                <p class="font-bold mb-1">Dica de teste! Tente ler esta frase:</p>
+                <p class="italic leading-relaxed">"A Maya e o Raul viram um leão, um cavalo e um macaco brincando perto do rio! De repente, veio o vento, a chuva e um trovão forte. O carro tocou a buzina, o cachorro deu um pulo e todos deram uma grande risada com a magia!"</p>
+            </div>
+
+            <!-- Log do que está sendo lido -->
+            <div class="mb-6 text-left">
+                <h3 class="font-bold text-gray-700 dark:text-gray-300 mb-2 text-sm uppercase tracking-wide">História sendo ouvida:</h3>
+                <div id="transcript" class="w-full h-24 p-3 bg-white dark:bg-slate-800 rounded-lg text-sm text-gray-600 dark:text-gray-400 overflow-y-auto italic border border-gray-200 dark:border-slate-700 shadow-inner"></div>
+            </div>
+            
+            <div class="mb-4 flex flex-col md:flex-row md:justify-between items-center text-xs text-gray-500 dark:text-gray-400 gap-3">
+                <span id="status" class="font-semibold text-indigo-500 dark:text-indigo-400">Status: Aguardando...</span>
+            </div>
+        </div>
+
+        <!-- Controles do Microfone (Fica sempre visível, mas muda de estilo) -->
+        <button id="btn-mic" class="bg-red-500 hover:bg-red-600 text-white font-bold py-4 px-8 rounded-full text-xl transition-all shadow-lg shadow-red-500/30 flex items-center justify-center mx-auto gap-3 mt-2 w-full md:w-auto">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clip-rule="evenodd"></path></svg>
+            <span id="btn-text">Iniciar Magia</span>
+        </button>
+
+    </div>
+
+    <script>
+        // 1. Dark Mode Toggle
+        const btnTheme = document.getElementById('btn-theme');
+        const body = document.body;
+
+        btnTheme.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            if(document.documentElement.classList.contains('dark')) {
+                body.classList.replace('bg-light-mode', 'bg-dark-mode');
+            } else {
+                body.classList.replace('bg-dark-mode', 'bg-light-mode');
+            }
+        });
+
+        // 2. Wake Lock API (Impede o iPhone de apagar a tela)
+        let wakeLock = null;
+        async function requestWakeLock() {
+            if ('wakeLock' in navigator) {
+                try {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    console.log('Wake Lock ativo: Tela não vai apagar.');
+                } catch (err) {
+                    console.log(`${err.name}, ${err.message}`);
+                }
+            }
+        }
+
+        function releaseWakeLock() {
+            if (wakeLock !== null) {
+                wakeLock.release()
+                    .then(() => { wakeLock = null; console.log('Wake Lock liberado.'); });
+            }
+        }
+
+        // 3. Dicionário de Gatilhos (Atualizado para .mp3 por performance)
+        const soundLibrary = {
+            // Animais
+            'cachorro': { audio: new Audio('./audios/cachorro.mp3'), emoji: '🐶' },
+            'gato': { audio: new Audio('./audios/gato.mp3'), emoji: '🐱' },
+            'leão': { audio: new Audio('./audios/leao.mp3'), emoji: '🦁' },
+            'cavalo': { audio: new Audio('./audios/cavalo.mp3'), emoji: '🐴' },
+            'passarinho': { audio: new Audio('./audios/passarinho.mp3'), emoji: '🐦' },
+            'macaco': { audio: new Audio('./audios/macaco.mp3'), emoji: '🐵' },
+
+            // Natureza e Clima
+            'chuva': { audio: new Audio('./audios/chuva.mp3'), emoji: '🌧️' },
+            'vento': { audio: new Audio('./audios/vento.mp3'), emoji: '💨' },
+            'trovão': { audio: new Audio('./audios/trovao.mp3'), emoji: '⚡' },
+            'água': { audio: new Audio('./audios/agua.mp3'), emoji: '💧' },
+            'fogo': { audio: new Audio('./audios/fogo.mp3'), emoji: '🔥' },
+
+            // Ações e Expressões
+            'risada': { audio: new Audio('./audios/risada.mp3'), emoji: '😂' },
+            'choro': { audio: new Audio('./audios/choro.mp3'), emoji: '😭' },
+            'magia': { audio: new Audio('./audios/magia.mp3'), emoji: '🪄' },
+            'pulo': { audio: new Audio('./audios/pulo.mp3'), emoji: '🦘' },
+            
+            // Veículos
+            'carro': { audio: new Audio('./audios/carro.mp3'), emoji: '🚗' },
+            'buzina': { audio: new Audio('./audios/buzina.mp3'), emoji: '📯' },
+            'avião': { audio: new Audio('./audios/aviao.mp3'), emoji: '✈️' }
+        };
+
+        // 4. Configuração da Web Speech API e UI de Imersão
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition;
+        let isListening = false;
+        let lastProcessedIndex = 0; 
+
+        // Elementos da Interface
+        const immersiveEls = document.getElementById('immersive-elements');
+        const animaArea = document.getElementById('anima-area');
+        const listeningIndicator = document.getElementById('listening-indicator');
+        const subtitle = document.getElementById('subtitle');
+
+        function toggleImmersiveMode(active) {
+            if (active) {
+                // Esconde textos e expande a área de animação
+                immersiveEls.style.height = immersiveEls.scrollHeight + 'px';
+                setTimeout(() => { immersiveEls.style.height = '0px'; immersiveEls.style.opacity = '0'; }, 10);
+                
+                animaArea.classList.replace('h-48', 'h-72');
+                animaArea.classList.add('md:h-96');
+                listeningIndicator.classList.remove('opacity-0');
+                subtitle.innerText = "Lendo história...";
+            } else {
+                // Restaura o layout normal
+                immersiveEls.style.height = immersiveEls.scrollHeight + 'px';
+                immersiveEls.style.opacity = '1';
+                setTimeout(() => { immersiveEls.style.height = 'auto'; }, 500);
+                
+                animaArea.classList.replace('h-72', 'h-48');
+                animaArea.classList.remove('md:h-96');
+                listeningIndicator.classList.add('opacity-0');
+                subtitle.innerText = "Leia a história em voz alta e veja a magia acontecer!";
+            }
+        }
+
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = true; 
+            recognition.interimResults = false; 
+            recognition.lang = 'pt-BR'; 
+
+            recognition.onstart = () => {
+                isListening = true;
+                lastProcessedIndex = 0; 
+                requestWakeLock(); // Trava a tela ligada
+                
+                const btn = document.getElementById('btn-mic');
+                btn.classList.add('pulse', 'bg-slate-800', 'dark:bg-slate-700');
+                btn.classList.remove('bg-red-500', 'hover:bg-red-600', 'shadow-red-500/30');
+                document.getElementById('btn-text').innerText = 'Parar Leitura';
+                document.getElementById('status').innerText = 'Status: Microfone Aberto 🎙️';
+                
+                toggleImmersiveMode(true);
+            };
+
+            recognition.onend = () => {
+                if (isListening) {
+                    recognition.start(); // Reinicia caso o iOS pause por silêncio
+                } else {
+                    releaseWakeLock(); // Libera a tela
+                    const btn = document.getElementById('btn-mic');
+                    btn.classList.remove('pulse', 'bg-slate-800', 'dark:bg-slate-700');
+                    btn.classList.add('bg-red-500', 'hover:bg-red-600', 'shadow-red-500/30');
+                    document.getElementById('btn-text').innerText = 'Iniciar Magia';
+                    document.getElementById('status').innerText = 'Status: Pausado';
+                    
+                    toggleImmersiveMode(false);
+                }
+            };
+
+            recognition.onresult = (event) => {
+                const transcriptBox = document.getElementById('transcript');
+                let currentTranscript = '';
+
+                for (let i = lastProcessedIndex; i < event.results.length; i++) {
+                    const sentence = event.results[i][0].transcript.trim().toLowerCase();
+                    currentTranscript += sentence + ' ';
+                    processWords(sentence);
+                    lastProcessedIndex = i + 1; 
+                }
+                
+                if (currentTranscript) {
+                    transcriptBox.innerText += currentTranscript;
+                    transcriptBox.scrollTop = transcriptBox.scrollHeight;
+                }
+            };
+
+        } else {
+            alert("Seu navegador não suporta a Web Speech API. Por favor, use o Safari no iOS ou Chrome.");
+        }
+
+        // 5. Processamento e Efeitos GSAP + Vibração
+        function processWords(sentence) {
+            const words = sentence.replace(/[.,!?;:'"]/g, '').split(/\s+/);
+            
+            words.forEach(word => {
+                let baseWord = word;
+                if (!soundLibrary[word] && word.endsWith('s')) {
+                    baseWord = word.slice(0, -1); 
+                }
+
+                if (soundLibrary[baseWord]) {
+                    playSoundAndAnimate(baseWord);
+                }
+            });
+        }
+
+        function playSoundAndAnimate(word) {
+            const item = soundLibrary[word];
+            
+            // Toca o Som
+            const audioClone = item.audio.cloneNode();
+            audioClone.volume = 1.0; 
+            audioClone.play().catch(e => console.log("Aguardando interação."));
+
+            // Feedback Tátil (Vibração leve no celular)
+            if (navigator.vibrate) {
+                navigator.vibrate(50); 
+            }
+
+            // Animação do Emoji
+            const emojiEl = document.getElementById('emoji-display');
+            emojiEl.innerText = item.emoji;
+            
+            // Interrompe animação anterior se houver outra palavra seguida
+            gsap.killTweensOf(emojiEl);
+
+            gsap.fromTo(emojiEl, 
+                { opacity: 0, scale: 0.2, y: 30, rotation: Math.random() * 40 - 20 }, 
+                { opacity: 1, scale: 2.5, y: -20, rotation: 0, duration: 0.6, ease: "back.out(1.7)" }
+            );
+            
+            gsap.to(emojiEl, {
+                opacity: 0, scale: 0.5, y: -60, duration: 0.5, delay: 2.5, ease: "power1.in"
+            });
+        }
+
+        // 6. Botão Principal
+        document.getElementById('btn-mic').addEventListener('click', () => {
+            if (isListening) {
+                isListening = false;
+                recognition.stop();
+            } else {
+                // Toca um áudio silencioso primeiro para liberar permissões de áudio no iOS
+                const unlockAudio = new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA");
+                unlockAudio.play().catch(()=>console.log("Audio unlock"));
+                
+                recognition.start();
+            }
+        });
+    </script>
+</body>
+</html>
