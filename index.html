@@ -19,7 +19,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     
     <style>
-        /* Fundos Animados Modernos */
         body {
             background-size: 300% 300%;
             animation: gradientShift 20s ease infinite;
@@ -36,7 +35,6 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* Efeito de Vidro (Glassmorphism) */
         .glass-panel {
             background: rgba(255, 255, 255, 0.65);
             backdrop-filter: blur(16px);
@@ -50,7 +48,6 @@
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
-        /* Animação do Botão Mic (Aura) */
         .mic-active {
             box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7);
             animation: pulse-purple 1.5s infinite cubic-bezier(0.66, 0, 0, 1);
@@ -59,7 +56,6 @@
             to { box-shadow: 0 0 0 25px rgba(139, 92, 246, 0); }
         }
 
-        /* Barras de Áudio Animadas */
         .audio-bar {
             width: 4px;
             background-color: #ef4444;
@@ -86,13 +82,13 @@
         
         <!-- Cabeçalho de Navegação -->
         <div class="flex justify-between items-center mb-8">
-            <button id="btn-settings" class="w-12 h-12 flex items-center justify-center rounded-full bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-700 text-purple-600 dark:text-purple-400 hover:scale-105 transition-all shadow-sm">
+            <button id="btn-settings" class="w-12 h-12 flex items-center justify-center rounded-full bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-700 text-purple-600 dark:text-purple-400 hover:scale-105 transition-all shadow-sm" title="Adicionar Som">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
             </button>
             
             <h1 class="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-500 dark:from-purple-400 dark:to-indigo-300 tracking-tight">Livro Mágico ✨</h1>
             
-            <button id="btn-theme" class="w-12 h-12 flex items-center justify-center rounded-full bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-700 text-amber-500 hover:scale-105 transition-all shadow-sm">
+            <button id="btn-theme" class="w-12 h-12 flex items-center justify-center rounded-full bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-700 text-amber-500 hover:scale-105 transition-all shadow-sm" title="Modo Noturno">
                 <svg id="icon-moon" class="w-6 h-6 block dark:hidden text-indigo-600" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
                 <svg id="icon-sun" class="w-6 h-6 hidden dark:block" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path></svg>
             </button>
@@ -104,7 +100,7 @@
             <input type="text" id="new-word" placeholder="Qual palavra? (ex: dinossauro)" class="w-full mb-4 p-4 rounded-2xl border border-purple-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-400 shadow-inner text-lg">
             <input type="text" id="new-emoji" placeholder="Cole o Emoji aqui (ex: 🦖)" class="w-full mb-6 p-4 rounded-2xl border border-purple-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white text-3xl text-center focus:outline-none focus:ring-2 focus:ring-purple-400 shadow-inner">
             <div class="w-full mb-8 text-left">
-                <label class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-3">Selecione o som (.mp3)</label>
+                <label class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-3">Selecione o som (.mp3 ou .wav)</label>
                 <input type="file" id="new-audio" accept="audio/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-purple-100 file:text-purple-700 hover:file:bg-purple-200 dark:file:bg-slate-700 dark:file:text-purple-300 cursor-pointer transition-colors">
             </div>
             <div class="flex gap-4 w-full">
@@ -116,9 +112,12 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6 font-medium text-lg" id="subtitle">A mágica acontece quando você lê em voz alta!</p>
 
         <!-- Palco do Emoji -->
-        <div id="anima-area" class="h-56 md:h-64 flex items-center justify-center mb-8 bg-white/40 dark:bg-slate-800/40 rounded-3xl border border-white/50 dark:border-slate-600/50 overflow-hidden relative shadow-inner transition-all duration-700 ease-in-out">
-            <span id="emoji-display" class="text-8xl md:text-9xl opacity-0 transform scale-50 drop-shadow-xl">✨</span>
+        <div id="anima-area" class="h-56 md:h-64 flex items-center justify-center mb-6 bg-white/40 dark:bg-slate-800/40 rounded-3xl border border-white/50 dark:border-slate-600/50 overflow-hidden relative shadow-inner transition-all duration-700 ease-in-out">
+            <span id="emoji-display" class="text-8xl md:text-9xl opacity-0 transform scale-50 drop-shadow-xl select-none">✨</span>
             
+            <!-- Feedback de Status do Som no Palco -->
+            <div id="audio-feedback" class="absolute top-3 left-4 text-xs font-semibold text-purple-600 dark:text-purple-300 opacity-0 transition-opacity duration-300"></div>
+
             <!-- Indicador de Ouvindo Moderno -->
             <div id="listening-indicator" class="absolute bottom-4 right-4 flex items-end gap-1 opacity-0 transition-opacity duration-500 h-6">
                 <div class="audio-bar"></div>
@@ -130,15 +129,25 @@
         
         <!-- ELEMENTOS DE LEITURA (Ocultos no modo imersivo) -->
         <div id="immersive-elements" class="transition-all duration-500 overflow-hidden">
+            <!-- Botões rápidos de teste de som -->
+            <div class="mb-4 flex flex-wrap items-center justify-center gap-2 text-xs">
+                <span class="text-gray-500 dark:text-gray-400 font-medium">Testar som:</span>
+                <button onclick="triggerEffect('leão')" class="px-3 py-1.5 rounded-full bg-white/70 dark:bg-slate-800/70 hover:bg-purple-100 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-200 font-semibold shadow-sm transition-all">🦁 Leão</button>
+                <button onclick="triggerEffect('macaco')" class="px-3 py-1.5 rounded-full bg-white/70 dark:bg-slate-800/70 hover:bg-purple-100 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-200 font-semibold shadow-sm transition-all">🐵 Macaco</button>
+                <button onclick="triggerEffect('gato')" class="px-3 py-1.5 rounded-full bg-white/70 dark:bg-slate-800/70 hover:bg-purple-100 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-200 font-semibold shadow-sm transition-all">🐱 Gato</button>
+                <button onclick="triggerEffect('galinha')" class="px-3 py-1.5 rounded-full bg-white/70 dark:bg-slate-800/70 hover:bg-purple-100 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-200 font-semibold shadow-sm transition-all">🐔 Galinha</button>
+                <button onclick="triggerEffect('pato')" class="px-3 py-1.5 rounded-full bg-white/70 dark:bg-slate-800/70 hover:bg-purple-100 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-200 font-semibold shadow-sm transition-all">🦆 Pato</button>
+            </div>
+
             <!-- Log de Transcrição Ao Vivo -->
             <div class="mb-6 text-left relative">
-                <h3 class="font-bold text-gray-700 dark:text-gray-300 mb-3 text-sm uppercase tracking-wider flex justify-between">
+                <h3 class="font-bold text-gray-700 dark:text-gray-300 mb-2 text-sm uppercase tracking-wider flex justify-between">
                     <span>Lendo agora:</span>
-                    <span id="status" class="text-xs font-medium text-purple-500 dark:text-purple-400">Pronto para começar</span>
+                    <span id="status" class="text-xs font-medium text-purple-600 dark:text-purple-400">Pronto para começar</span>
                 </h3>
-                <div id="transcript-container" class="w-full h-32 p-4 bg-white/60 dark:bg-slate-800/60 rounded-2xl text-base md:text-lg text-gray-700 dark:text-gray-200 overflow-y-auto italic border border-white/40 dark:border-slate-600 shadow-inner leading-relaxed">
+                <div id="transcript-container" class="w-full h-28 p-4 bg-white/60 dark:bg-slate-800/60 rounded-2xl text-base md:text-lg text-gray-700 dark:text-gray-200 overflow-y-auto italic border border-white/40 dark:border-slate-600 shadow-inner leading-relaxed">
                     <span id="final-text"></span>
-                    <span id="interim-text" class="text-gray-400 dark:text-gray-500"></span>
+                    <span id="interim-text" class="text-purple-600 dark:text-purple-400 font-semibold"></span>
                 </div>
             </div>
         </div>
@@ -152,10 +161,9 @@
     </div>
 
     <script>
-        // Animação inicial de carregamento da página
         gsap.to(".app-container", { opacity: 1, y: 0, duration: 1, ease: "power3.out" });
 
-        // Dark Mode
+        // 1. Dark Mode
         const btnTheme = document.getElementById('btn-theme');
         const body = document.body;
 
@@ -165,7 +173,7 @@
             body.classList.toggle('bg-light-mode');
         });
 
-        // Wake Lock API (Evitar que a tela desligue)
+        // 2. Wake Lock API (Evitar que a tela desligue)
         let wakeLock = null;
         async function requestWakeLock() {
             if ('wakeLock' in navigator) {
@@ -177,18 +185,54 @@
             if (wakeLock !== null) { wakeLock.release().then(() => { wakeLock = null; }); }
         }
 
-        // Biblioteca de Sons
+        // 3. REPRODUTOR DE ÁUDIO ÚNICO E CONTEXTO WEB AUDIO (Destrava o iOS/Safari)
+        const globalAudio = new Audio();
+        globalAudio.playsInline = true;
+        let audioCtx = null;
+
+        function unlockMobileAudio() {
+            // Destrava o Web Audio API
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (AudioContextClass) {
+                if (!audioCtx) audioCtx = new AudioContextClass();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+            }
+            // Configura sessão de áudio no iOS 17+ para tocar alto mesmo usando microfone
+            if (navigator.audioSession) {
+                try { navigator.audioSession.type = 'play-and-record'; } catch(e) {}
+            }
+            // Destrava a instância única do HTMLAudioElement
+            globalAudio.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
+            globalAudio.volume = 1.0;
+            globalAudio.play().catch(() => {});
+        }
+
+        // 4. Biblioteca de Sons (Mapeada exatamente com os arquivos do seu print no GitHub!)
         const baseLibrary = {
+            // Arquivos presentes no seu print da pasta /audios:
+            'leão': { audioSrc: './audios/Leão.WAV', emoji: '🦁' },
+            'leao': { audioSrc: './audios/Leão.WAV', emoji: '🦁' },
+            'macaco': { audioSrc: './audios/macaco.mp3', emoji: '🐵' },
+            'cabra': { audioSrc: './audios/cabra.wav', emoji: '🐐' },
+            'bode': { audioSrc: './audios/cabra.wav', emoji: '🐐' },
+            'galinha': { audioSrc: './audios/galinha.wav', emoji: '🐔' },
+            'gato': { audioSrc: './audios/gato.wav', emoji: '🐱' },
+            'pato': { audioSrc: './audios/pato.wav', emoji: '🦆' },
+            'galo': { audioSrc: './audios/rooster-crow.wav', emoji: '🐓' },
+            'planta': { audioSrc: './audios/crop-wither.wav', emoji: '🌿' },
+            'mato': { audioSrc: './audios/weed-pull.wav', emoji: '🌱' },
+            'quebrou': { audioSrc: './audios/tool-break.wav', emoji: '💥' },
+
+            // Outros gatilhos (caso você suba depois em .mp3 ou .wav):
             'cachorro': { audioSrc: './audios/cachorro.mp3', emoji: '🐶' },
-            'gato': { audioSrc: './audios/gato.mp3', emoji: '🐱' },
-            'leão': { audioSrc: './audios/leao.mp3', emoji: '🦁' },
             'cavalo': { audioSrc: './audios/cavalo.mp3', emoji: '🐴' },
             'passarinho': { audioSrc: './audios/passarinho.mp3', emoji: '🐦' },
-            'macaco': { audioSrc: './audios/macaco.mp3', emoji: '🐵' },
             'chuva': { audioSrc: './audios/chuva.mp3', emoji: '🌧️' },
             'vento': { audioSrc: './audios/vento.mp3', emoji: '💨' },
             'trovão': { audioSrc: './audios/trovao.mp3', emoji: '⚡' },
+            'trovao': { audioSrc: './audios/trovao.mp3', emoji: '⚡' },
             'água': { audioSrc: './audios/agua.mp3', emoji: '💧' },
+            'agua': { audioSrc: './audios/agua.mp3', emoji: '💧' },
             'fogo': { audioSrc: './audios/fogo.mp3', emoji: '🔥' },
             'risada': { audioSrc: './audios/risada.mp3', emoji: '😂' },
             'choro': { audioSrc: './audios/choro.mp3', emoji: '😭' },
@@ -196,12 +240,13 @@
             'pulo': { audioSrc: './audios/pulo.mp3', emoji: '🦘' },
             'carro': { audioSrc: './audios/carro.mp3', emoji: '🚗' },
             'buzina': { audioSrc: './audios/buzina.mp3', emoji: '📯' },
-            'avião': { audioSrc: './audios/aviao.mp3', emoji: '✈️' }
+            'avião': { audioSrc: './audios/aviao.mp3', emoji: '✈️' },
+            'aviao': { audioSrc: './audios/aviao.mp3', emoji: '✈️' }
         };
 
         let customLibrary = JSON.parse(localStorage.getItem('livroMagicoCustomWords')) || {};
 
-        // Adicionar Palavra
+        // 5. Painel de Adicionar Palavra Customizada
         const addPanel = document.getElementById('add-word-panel');
         document.getElementById('btn-settings').addEventListener('click', () => {
             addPanel.classList.remove('hidden'); addPanel.classList.add('flex');
@@ -227,15 +272,19 @@
                 customLibrary[word] = { audioSrc: e.target.result, emoji: emoji };
                 localStorage.setItem('livroMagicoCustomWords', JSON.stringify(customLibrary));
                 alert(`Encanto salvo: "${word}" 🪄`);
-                document.getElementById('btn-cancel-add').click(); // Fecha painel
+                document.getElementById('new-word').value = '';
+                document.getElementById('new-emoji').value = '';
+                fileInput.value = '';
+                document.getElementById('btn-cancel-add').click();
             };
             reader.readAsDataURL(fileInput.files[0]);
         });
 
-        // Configuração da Web Speech API (COM FEEDBACK AO VIVO)
+        // 6. Configuração da Web Speech API
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition;
         let isListening = false;
+        let wordCooldowns = {}; // Evita que a mesma palavra toque repetidamente na mesma frase
 
         const immersiveEls = document.getElementById('immersive-elements');
         const animaArea = document.getElementById('anima-area');
@@ -257,7 +306,6 @@
         if (SpeechRecognition) {
             recognition = new SpeechRecognition();
             recognition.continuous = true; 
-            // A MAGIA ACONTECE AQUI: true faz o texto aparecer ao vivo enquanto você fala
             recognition.interimResults = true; 
             recognition.lang = 'pt-BR'; 
 
@@ -269,24 +317,22 @@
                 btn.classList.add('mic-active', 'bg-slate-800', 'dark:bg-slate-700');
                 btn.classList.remove('bg-gradient-to-r', 'from-purple-600', 'to-indigo-600', 'hover:scale-105');
                 document.getElementById('btn-text').innerText = 'Pausar Leitura';
-                document.getElementById('status').innerText = 'Gravando... 🎙️';
+                document.getElementById('status').innerText = 'Ouvindo... 🎙️';
                 
-                document.getElementById('final-text').innerText = ''; // Limpa log anterior
-                document.getElementById('interim-text').innerText = '';
                 toggleImmersiveMode(true);
             };
 
             recognition.onerror = (event) => {
-                console.error("Erro no áudio:", event.error);
-                document.getElementById('status').innerText = 'Erro: ' + event.error;
+                console.warn("Aviso no microfone:", event.error);
                 if(event.error === 'not-allowed') {
-                    alert('Por favor, permita o acesso ao microfone no navegador para a mágica funcionar!');
+                    isListening = false;
+                    alert('Permita o acesso ao microfone no navegador para a mágica funcionar!');
                 }
             };
 
             recognition.onend = () => {
                 if (isListening) {
-                    recognition.start(); // iOS Safari costuma derrubar a API no silêncio, isso força a voltar
+                    try { recognition.start(); } catch(e) {}
                 } else {
                     releaseWakeLock(); 
                     const btn = document.getElementById('btn-mic');
@@ -312,12 +358,12 @@
                     }
                 }
                 
-                // Exibe o texto enquanto você fala (resolve a sensação de "não estar reconhecendo")
                 document.getElementById('interim-text').innerText = interimText;
 
-                // Processa a palavra para tocar o som assim que a frase fechar
-                if (finalSentence.trim().length > 0) {
-                    processWords(finalSentence);
+                // Dispara imediatamente tanto nas palavras ao vivo quanto nas finais!
+                const textToAnalyze = (interimText + ' ' + finalSentence).trim();
+                if (textToAnalyze.length > 0) {
+                    processWords(textToAnalyze);
                     const container = document.getElementById('transcript-container');
                     container.scrollTop = container.scrollHeight;
                 }
@@ -327,24 +373,104 @@
             alert("Atenção: A digitação por voz não é suportada neste navegador. Tente no Safari (iOS) ou Chrome.");
         }
 
+        // 7. Processamento de Palavras com Cooldown
         function processWords(sentence) {
             const words = sentence.toLowerCase().replace(/[.,!?;:'"]/g, '').split(/\s+/);
             const combinedLibrary = { ...baseLibrary, ...customLibrary };
+            const now = Date.now();
 
             words.forEach(word => {
-                let baseWord = word;
-                if (!combinedLibrary[word] && word.endsWith('s')) baseWord = word.slice(0, -1); 
+                if (!word) return;
+                let targetWord = word;
 
-                if (combinedLibrary[baseWord]) {
-                    playSoundAndAnimate(combinedLibrary[baseWord]);
+                // Trata plural simples (ex: "macacos" -> "macaco", "leões" -> "leão")
+                if (!combinedLibrary[targetWord]) {
+                    if (targetWord === 'leões' || targetWord === 'leoes') targetWord = 'leão';
+                    else if (targetWord.endsWith('s')) targetWord = targetWord.slice(0, -1);
+                }
+
+                if (combinedLibrary[targetWord]) {
+                    // Cooldown de 2.5 segundos por palavra para não tocar repetido enquanto a frase ainda está sendo falada
+                    if (!wordCooldowns[targetWord] || (now - wordCooldowns[targetWord] > 2500)) {
+                        wordCooldowns[targetWord] = now;
+                        playSoundAndAnimate(targetWord, combinedLibrary[targetWord]);
+                    }
                 }
             });
         }
 
-        function playSoundAndAnimate(item) {
-            const audio = new Audio(item.audioSrc);
-            audio.volume = 1.0; 
-            audio.play().catch(e => console.log("Aguardando interação do usuário."));
+        // Função para os botões de teste rápido
+        window.triggerEffect = function(word) {
+            unlockMobileAudio();
+            const combinedLibrary = { ...baseLibrary, ...customLibrary };
+            if (combinedLibrary[word]) {
+                playSoundAndAnimate(word, combinedLibrary[word]);
+            }
+        };
+
+        // 8. Reprodução com Fallback Automático de Extensão (.mp3 / .wav / .WAV)
+        function showAudioFeedback(msg) {
+            const fb = document.getElementById('audio-feedback');
+            fb.innerText = msg;
+            fb.classList.remove('opacity-0');
+            clearTimeout(fb.hideTimer);
+            fb.hideTimer = setTimeout(() => fb.classList.add('opacity-0'), 2500);
+        }
+
+        function playSoundWithFallback(src, word) {
+            // Se for Base64 (upload do celular), toca direto
+            if (src.startsWith('data:')) {
+                globalAudio.src = src;
+                globalAudio.play().catch(err => console.error(err));
+                return;
+            }
+
+            // Lista de tentativas caso o nome no GitHub tenha extensão ou maiúscula diferente
+            const baseName = src.replace(/\.(mp3|wav|WAV)$/i, '');
+            const fileNameOnly = baseName.split('/').pop();
+            const capitalized = fileNameOnly.charAt(0).toUpperCase() + fileNameOnly.slice(1);
+            
+            const candidates = [
+                src,
+                `${baseName}.wav`,
+                `${baseName}.mp3`,
+                `${baseName}.WAV`,
+                `./audios/${capitalized}.mp3`,
+                `./audios/${capitalized}.wav`,
+                `./audios/${capitalized}.WAV`
+            ];
+            // Remove duplicados
+            const uniqueCandidates = [...new Set(candidates)];
+            let attemptIndex = 0;
+
+            function tryNext() {
+                if (attemptIndex >= uniqueCandidates.length) {
+                    showAudioFeedback(`⚠️ Áudio de "${word}" não encontrado na pasta`);
+                    return;
+                }
+                const currentCandidate = encodeURI(uniqueCandidates[attemptIndex]);
+                attemptIndex++;
+
+                globalAudio.onerror = () => {
+                    tryNext(); // Se deu erro 404 no GitHub, tenta a próxima variação automaticamente
+                };
+                globalAudio.onplaying = () => {
+                    showAudioFeedback(`🔊 Tocando: ${word}`);
+                };
+
+                globalAudio.src = currentCandidate;
+                globalAudio.load();
+                globalAudio.play().catch(() => {
+                    // Se falhou por não encontrar ou bloqueio, tenta o próximo
+                    if (globalAudio.error) tryNext();
+                });
+            }
+
+            tryNext();
+        }
+
+        function playSoundAndAnimate(word, item) {
+            playSoundWithFallback(item.audioSrc, word);
 
             if (navigator.vibrate) navigator.vibrate(50); 
 
@@ -353,7 +479,6 @@
             
             gsap.killTweensOf(emojiEl);
             
-            // Animação de Pulo Mágico do GSAP
             gsap.fromTo(emojiEl, 
                 { opacity: 0, scale: 0, y: 50, rotation: Math.random() * 60 - 30 }, 
                 { opacity: 1, scale: 2.5, y: -20, rotation: 0, duration: 0.7, ease: "elastic.out(1, 0.5)" }
@@ -364,15 +489,14 @@
             });
         }
 
+        // 9. Controle do Botão Principal
         document.getElementById('btn-mic').addEventListener('click', () => {
             if (isListening) {
                 isListening = false;
                 recognition.stop();
             } else {
-                // Hack para liberar o som no iPhone no primeiro toque
-                const unlockAudio = new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA");
-                unlockAudio.play().catch(()=>{});
-                recognition.start();
+                unlockMobileAudio();
+                try { recognition.start(); } catch(e) {}
             }
         });
     </script>
