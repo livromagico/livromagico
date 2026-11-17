@@ -43,7 +43,7 @@
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
         }
         .dark .glass-panel {
-            background: rgba(15, 23, 42, 0.7);
+            background: rgba(15, 23, 42, 0.75);
             border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
@@ -54,6 +54,14 @@
         }
         @keyframes pulse-purple {
             to { box-shadow: 0 0 0 25px rgba(139, 92, 246, 0); }
+        }
+
+        .rec-active {
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            animation: pulse-red 1s infinite cubic-bezier(0.66, 0, 0, 1);
+        }
+        @keyframes pulse-red {
+            to { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
         }
 
         .audio-bar {
@@ -81,35 +89,104 @@
     <div class="glass-panel p-6 md:p-10 rounded-[2.5rem] max-w-2xl w-full text-center relative overflow-hidden app-container opacity-0 translate-y-8">
         
         <!-- Cabeçalho de Navegação -->
-        <div class="flex justify-between items-center mb-8">
-            <button id="btn-settings" class="w-12 h-12 flex items-center justify-center rounded-full bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-700 text-purple-600 dark:text-purple-400 hover:scale-105 transition-all shadow-sm" title="Adicionar Som">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+        <div class="flex justify-between items-center mb-6">
+            <button id="btn-open-studio" class="px-4 py-2.5 flex items-center justify-center gap-2 rounded-full bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs md:text-sm hover:scale-105 transition-all shadow-md shadow-purple-500/20">
+                <span>🎙️ Sons próprios</span>
+                <span id="custom-count-badge" class="bg-white text-purple-700 px-2 py-0.5 rounded-full text-xs font-extrabold hidden">0</span>
             </button>
             
-            <h1 class="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-500 dark:from-purple-400 dark:to-indigo-300 tracking-tight">Livro Mágico ✨</h1>
+            <h1 class="text-2xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-500 dark:from-purple-400 dark:to-indigo-300 tracking-tight">Livro Mágico ✨</h1>
             
-            <button id="btn-theme" class="w-12 h-12 flex items-center justify-center rounded-full bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-700 text-amber-500 hover:scale-105 transition-all shadow-sm" title="Modo Noturno">
-                <svg id="icon-moon" class="w-6 h-6 block dark:hidden text-indigo-600" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
-                <svg id="icon-sun" class="w-6 h-6 hidden dark:block" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path></svg>
+            <button id="btn-theme" class="w-11 h-11 flex items-center justify-center rounded-full bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-700 text-amber-500 hover:scale-105 transition-all shadow-sm" title="Modo Noturno">
+                <svg id="icon-moon" class="w-5 h-5 block dark:hidden text-indigo-600" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                <svg id="icon-sun" class="w-5 h-5 hidden dark:block" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path></svg>
             </button>
         </div>
 
-        <!-- Painel de Adicionar Palavra -->
-        <div id="add-word-panel" class="hidden absolute inset-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl z-20 p-8 flex-col justify-center items-center rounded-[2.5rem] transition-all">
-            <h2 class="text-3xl font-bold text-purple-600 dark:text-purple-400 mb-8">Novo Encanto 🪄</h2>
-            <input type="text" id="new-word" placeholder="Qual palavra? (ex: dinossauro)" class="w-full mb-4 p-4 rounded-2xl border border-purple-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-400 shadow-inner text-lg">
-            <input type="text" id="new-emoji" placeholder="Cole o Emoji aqui (ex: 🦖)" class="w-full mb-6 p-4 rounded-2xl border border-purple-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white text-3xl text-center focus:outline-none focus:ring-2 focus:ring-purple-400 shadow-inner">
-            <div class="w-full mb-8 text-left">
-                <label class="block text-sm font-semibold text-gray-600 dark:text-gray-400 mb-3">Selecione o som (.mp3 ou .wav)</label>
-                <input type="file" id="new-audio" accept="audio/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-purple-100 file:text-purple-700 hover:file:bg-purple-200 dark:file:bg-slate-700 dark:file:text-purple-300 cursor-pointer transition-colors">
+        <!-- ========================================== -->
+        <!-- ESTÚDIO DE SONS PRÓPRIOS (GRAVAÇÃO RÁPIDA) -->
+        <!-- ========================================== -->
+        <div id="custom-sounds-studio" class="hidden absolute inset-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl z-30 p-6 md:p-8 flex-col justify-between items-center rounded-[2.5rem] overflow-y-auto">
+            <div class="w-full">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-extrabold text-purple-600 dark:text-purple-400">🎙️ Estúdio: Sons Próprios</h2>
+                    <span class="text-xs font-semibold px-3 py-1 rounded-full bg-purple-100 dark:bg-slate-800 text-purple-700 dark:text-purple-300">Máx 4s por som</span>
+                </div>
+                <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 mb-5 text-left">
+                    Grave seus próprios efeitos sonoros! Digite ou fale a palavra que vai disparar o som (ou deixe em branco para usar o que você falar na gravação).
+                </p>
+
+                <!-- Passo 1: Nome da Palavra e Emoji -->
+                <div class="bg-purple-50/70 dark:bg-slate-800/70 p-4 rounded-2xl border border-purple-100 dark:border-slate-700 mb-4">
+                    <div class="flex gap-2 mb-3">
+                        <div class="relative flex-1">
+                            <input type="text" id="studio-word" placeholder="Palavra-gatilho (ou fale no 🗣️)" class="w-full p-3 pr-10 rounded-xl border border-purple-200 dark:border-slate-600 bg-white dark:bg-slate-900 dark:text-white text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-purple-400">
+                            <button id="btn-dictate-word" type="button" title="Falar nome da palavra" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-lg bg-purple-100 dark:bg-slate-700 text-purple-600 dark:text-purple-300 hover:bg-purple-200">
+                                🗣️
+                            </button>
+                        </div>
+                        <input type="text" id="studio-emoji" value="🔊" placeholder="Emoji" class="w-16 p-3 rounded-xl border border-purple-200 dark:border-slate-600 bg-white dark:bg-slate-900 dark:text-white text-xl text-center focus:outline-none focus:ring-2 focus:ring-purple-400">
+                    </div>
+
+                    <!-- Emojis Rápidos -->
+                    <div class="flex items-center justify-between gap-1 text-lg mb-4 overflow-x-auto py-1">
+                        <span class="text-xs text-gray-400 mr-1">Emoji:</span>
+                        <button type="button" onclick="selectEmoji('🔊')" class="hover:scale-125 transition-transform">🔊</button>
+                        <button type="button" onclick="selectEmoji('💥')" class="hover:scale-125 transition-transform">💥</button>
+                        <button type="button" onclick="selectEmoji('👹')" class="hover:scale-125 transition-transform">👹</button>
+                        <button type="button" onclick="selectEmoji('🦖')" class="hover:scale-125 transition-transform">🦖</button>
+                        <button type="button" onclick="selectEmoji('🧚')" class="hover:scale-125 transition-transform">🧚</button>
+                        <button type="button" onclick="selectEmoji('🐉')" class="hover:scale-125 transition-transform">🐉</button>
+                        <button type="button" onclick="selectEmoji('🐶')" class="hover:scale-125 transition-transform">🐶</button>
+                        <button type="button" onclick="selectEmoji('😂')" class="hover:scale-125 transition-transform">😂</button>
+                        <button type="button" onclick="selectEmoji('🚗')" class="hover:scale-125 transition-transform">🚗</button>
+                        <button type="button" onclick="selectEmoji('⚡')" class="hover:scale-125 transition-transform">⚡</button>
+                    </div>
+
+                    <!-- Barra de Progresso de Gravação (4 segundos) -->
+                    <div id="rec-progress-container" class="hidden w-full bg-gray-200 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden mb-3">
+                        <div id="rec-progress-bar" class="bg-red-500 h-full w-0 transition-all duration-100"></div>
+                    </div>
+
+                    <div id="studio-feedback" class="text-xs font-bold text-purple-600 dark:text-purple-400 mb-3 min-h-[1rem]"></div>
+
+                    <!-- Botões: Gravar Microfone ou Enviar Arquivo -->
+                    <div class="flex gap-2">
+                        <button id="btn-record-sound" type="button" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3.5 px-4 rounded-xl shadow-md flex items-center justify-center gap-2 transition-all">
+                            <span id="rec-icon">🔴</span>
+                            <span id="rec-btn-text">Gravar Som (máx 4s)</span>
+                        </button>
+                        <label class="cursor-pointer bg-white dark:bg-slate-700 hover:bg-gray-100 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-slate-600 font-semibold py-3.5 px-4 rounded-xl text-xs flex items-center justify-center" title="Ou envie um arquivo do celular">
+                            📁 Arquivo
+                            <input type="file" id="studio-file-upload" accept="audio/*" class="hidden">
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Lista de Sons Próprios Gravados -->
+                <div class="text-left mb-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Seus Sons Gravados:</h3>
+                        <button id="btn-clear-custom" class="text-xs text-red-500 hover:underline hidden">Apagar todos</button>
+                    </div>
+                    <div id="custom-sounds-list" class="max-h-36 overflow-y-auto flex flex-wrap gap-2 p-2 rounded-xl bg-gray-50 dark:bg-slate-800/50 border border-gray-200/60 dark:border-slate-700 min-h-[3.5rem] items-center">
+                        <span class="text-xs text-gray-400 italic mx-auto">Nenhum som próprio gravado ainda.</span>
+                    </div>
+                </div>
             </div>
-            <div class="flex gap-4 w-full">
-                <button id="btn-cancel-add" class="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-gray-800 dark:text-gray-200 py-4 rounded-full font-bold transition-all">Cancelar</button>
-                <button id="btn-save-word" class="flex-1 bg-gradient-to-r from-purple-600 to-indigo-500 hover:from-purple-700 hover:to-indigo-600 text-white py-4 rounded-full font-bold shadow-lg shadow-purple-500/40 transition-all">Salvar</button>
+
+            <!-- Rodapé do Estúdio: Finalizar e Iniciar Leitura -->
+            <div class="w-full flex flex-col gap-2 mt-2">
+                <button id="btn-finish-studio-and-read" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold py-4 rounded-full shadow-lg shadow-emerald-500/30 text-lg flex items-center justify-center gap-2 transition-all">
+                    <span>✅ Finalizar e Iniciar Leitura do Livro</span>
+                </button>
+                <button id="btn-close-studio" class="w-full text-xs text-gray-500 dark:text-gray-400 py-2 hover:underline">
+                    Apenas voltar para a tela inicial
+                </button>
             </div>
         </div>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-6 font-medium text-lg" id="subtitle">A mágica acontece quando você lê em voz alta!</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6 font-medium text-base md:text-lg" id="subtitle">A mágica acontece quando você lê em voz alta!</p>
 
         <!-- Palco do Emoji -->
         <div id="anima-area" class="h-56 md:h-64 flex items-center justify-center mb-6 bg-white/40 dark:bg-slate-800/40 rounded-3xl border border-white/50 dark:border-slate-600/50 overflow-hidden relative shadow-inner transition-all duration-700 ease-in-out">
@@ -129,15 +206,8 @@
         
         <!-- ELEMENTOS DE LEITURA (Ocultos no modo imersivo) -->
         <div id="immersive-elements" class="transition-all duration-500 overflow-hidden">
-            <!-- Botões rápidos de teste de som -->
-            <div class="mb-4 flex flex-wrap items-center justify-center gap-2 text-xs">
-                <span class="text-gray-500 dark:text-gray-400 font-medium">Testar som:</span>
-                <button onclick="triggerEffect('leão')" class="px-3 py-1.5 rounded-full bg-white/70 dark:bg-slate-800/70 hover:bg-purple-100 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-200 font-semibold shadow-sm transition-all">🦁 Leão</button>
-                <button onclick="triggerEffect('macaco')" class="px-3 py-1.5 rounded-full bg-white/70 dark:bg-slate-800/70 hover:bg-purple-100 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-200 font-semibold shadow-sm transition-all">🐵 Macaco</button>
-                <button onclick="triggerEffect('gato')" class="px-3 py-1.5 rounded-full bg-white/70 dark:bg-slate-800/70 hover:bg-purple-100 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-200 font-semibold shadow-sm transition-all">🐱 Gato</button>
-                <button onclick="triggerEffect('galinha')" class="px-3 py-1.5 rounded-full bg-white/70 dark:bg-slate-800/70 hover:bg-purple-100 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-200 font-semibold shadow-sm transition-all">🐔 Galinha</button>
-                <button onclick="triggerEffect('pato')" class="px-3 py-1.5 rounded-full bg-white/70 dark:bg-slate-800/70 hover:bg-purple-100 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-200 font-semibold shadow-sm transition-all">🦆 Pato</button>
-            </div>
+            <!-- Botões rápidos de teste de som (Incluindo Sons Próprios) -->
+            <div id="quick-test-bar" class="mb-4 flex flex-wrap items-center justify-center gap-1.5 text-xs"></div>
 
             <!-- Log de Transcrição Ao Vivo -->
             <div class="mb-6 text-left relative">
@@ -155,7 +225,7 @@
         <!-- Botão Principal -->
         <button id="btn-mic" class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-5 px-10 rounded-full text-xl transition-all shadow-xl shadow-purple-500/30 flex items-center justify-center mx-auto gap-4 mt-2 w-full md:w-auto z-10 relative group hover:scale-105">
             <svg class="w-7 h-7 group-hover:animate-bounce" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clip-rule="evenodd"></path></svg>
-            <span id="btn-text">Abrir Livro Mágico</span>
+            <span id="btn-text">Iniciar Leitura do Livro</span>
         </button>
 
     </div>
@@ -185,31 +255,27 @@
             if (wakeLock !== null) { wakeLock.release().then(() => { wakeLock = null; }); }
         }
 
-        // 3. REPRODUTOR DE ÁUDIO ÚNICO E CONTEXTO WEB AUDIO (Destrava o iOS/Safari)
+        // 3. Reprodutor de Áudio Único Destravado para Mobile
         const globalAudio = new Audio();
         globalAudio.playsInline = true;
         let audioCtx = null;
 
         function unlockMobileAudio() {
-            // Destrava o Web Audio API
             const AudioContextClass = window.AudioContext || window.webkitAudioContext;
             if (AudioContextClass) {
                 if (!audioCtx) audioCtx = new AudioContextClass();
                 if (audioCtx.state === 'suspended') audioCtx.resume();
             }
-            // Configura sessão de áudio no iOS 17+ para tocar alto mesmo usando microfone
             if (navigator.audioSession) {
                 try { navigator.audioSession.type = 'play-and-record'; } catch(e) {}
             }
-            // Destrava a instância única do HTMLAudioElement
             globalAudio.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
             globalAudio.volume = 1.0;
             globalAudio.play().catch(() => {});
         }
 
-        // 4. Biblioteca de Sons (Mapeada exatamente com os arquivos do seu print no GitHub!)
+        // 4. Biblioteca de Sons Base + Sons Próprios (localStorage)
         const baseLibrary = {
-            // Arquivos presentes no seu print da pasta /audios:
             'leão': { audioSrc: './audios/Leão.WAV', emoji: '🦁' },
             'leao': { audioSrc: './audios/Leão.WAV', emoji: '🦁' },
             'macaco': { audioSrc: './audios/macaco.mp3', emoji: '🐵' },
@@ -222,8 +288,6 @@
             'planta': { audioSrc: './audios/crop-wither.wav', emoji: '🌿' },
             'mato': { audioSrc: './audios/weed-pull.wav', emoji: '🌱' },
             'quebrou': { audioSrc: './audios/tool-break.wav', emoji: '💥' },
-
-            // Outros gatilhos (caso você suba depois em .mp3 ou .wav):
             'cachorro': { audioSrc: './audios/cachorro.mp3', emoji: '🐶' },
             'cavalo': { audioSrc: './audios/cavalo.mp3', emoji: '🐴' },
             'passarinho': { audioSrc: './audios/passarinho.mp3', emoji: '🐦' },
@@ -246,45 +310,340 @@
 
         let customLibrary = JSON.parse(localStorage.getItem('livroMagicoCustomWords')) || {};
 
-        // 5. Painel de Adicionar Palavra Customizada
-        const addPanel = document.getElementById('add-word-panel');
-        document.getElementById('btn-settings').addEventListener('click', () => {
-            addPanel.classList.remove('hidden'); addPanel.classList.add('flex');
-            gsap.fromTo(addPanel, {opacity: 0, scale: 0.9}, {opacity: 1, scale: 1, duration: 0.3});
+        // Atualiza a lista visual de Sons Próprios e a barra de teste rápido
+        function renderCustomSoundsUI() {
+            const listEl = document.getElementById('custom-sounds-list');
+            const badgeEl = document.getElementById('custom-count-badge');
+            const clearBtn = document.getElementById('btn-clear-custom');
+            const quickBar = document.getElementById('quick-test-bar');
+
+            const customKeys = Object.keys(customLibrary);
+            
+            // Atualiza contador no topo
+            if (customKeys.length > 0) {
+                badgeEl.innerText = customKeys.length;
+                badgeEl.classList.remove('hidden');
+                clearBtn.classList.remove('hidden');
+            } else {
+                badgeEl.classList.add('hidden');
+                clearBtn.classList.add('hidden');
+            }
+
+            // Renderiza lista dentro do estúdio
+            if (customKeys.length === 0) {
+                listEl.innerHTML = '<span class="text-xs text-gray-400 italic mx-auto">Nenhum som próprio gravado ainda.</span>';
+            } else {
+                listEl.innerHTML = '';
+                customKeys.forEach(word => {
+                    const item = customLibrary[word];
+                    const chip = document.createElement('div');
+                    chip.className = 'flex items-center gap-1.5 bg-white dark:bg-slate-900 border border-purple-200 dark:border-slate-600 px-3 py-1.5 rounded-full text-xs font-bold text-gray-700 dark:text-gray-200 shadow-sm';
+                    chip.innerHTML = `
+                        <button type="button" onclick="triggerEffect('${word}')" class="hover:scale-110 transition-transform flex items-center gap-1" title="Ouvir">
+                            <span>▶️</span><span>${item.emoji}</span><span>${word}</span>
+                        </button>
+                        <button type="button" onclick="deleteCustomSound('${word}')" class="text-gray-400 hover:text-red-500 ml-1 font-extrabold" title="Excluir">×</button>
+                    `;
+                    listEl.appendChild(chip);
+                });
+            }
+
+            // Renderiza botões na tela principal (sons próprios + principais do repositório)
+            let quickHTML = '<span class="text-gray-500 dark:text-gray-400 font-medium">Testar:</span>';
+            customKeys.forEach(word => {
+                const item = customLibrary[word];
+                quickHTML += `<button onclick="triggerEffect('${word}')" class="px-2.5 py-1 rounded-full bg-purple-100 dark:bg-purple-900/60 border border-purple-300 dark:border-purple-600 text-purple-800 dark:text-purple-200 font-bold shadow-sm transition-all">${item.emoji} ${word}</button>`;
+            });
+            const defaultSamples = [
+                { w: 'leão', e: '🦁', label: 'Leão' },
+                { w: 'macaco', e: '🐵', label: 'Macaco' },
+                { w: 'gato', e: '🐱', label: 'Gato' },
+                { w: 'galinha', e: '🐔', label: 'Galinha' },
+                { w: 'pato', e: '🦆', label: 'Pato' }
+            ];
+            defaultSamples.forEach(s => {
+                if (!customLibrary[s.w]) {
+                    quickHTML += `<button onclick="triggerEffect('${s.w}')" class="px-2.5 py-1 rounded-full bg-white/70 dark:bg-slate-800/70 hover:bg-purple-100 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-200 font-semibold shadow-sm transition-all">${s.e} ${s.label}</button>`;
+                }
+            });
+            quickBar.innerHTML = quickHTML;
+        }
+
+        window.selectEmoji = function(emoji) {
+            document.getElementById('studio-emoji').value = emoji;
+        };
+
+        window.deleteCustomSound = function(word) {
+            delete customLibrary[word];
+            localStorage.setItem('livroMagicoCustomWords', JSON.stringify(customLibrary));
+            renderCustomSoundsUI();
+        };
+
+        document.getElementById('btn-clear-custom').addEventListener('click', () => {
+            if (confirm('Deseja apagar todos os seus sons próprios gravados?')) {
+                customLibrary = {};
+                localStorage.removeItem('livroMagicoCustomWords');
+                renderCustomSoundsUI();
+            }
         });
 
-        document.getElementById('btn-cancel-add').addEventListener('click', () => {
-            gsap.to(addPanel, {opacity: 0, scale: 0.9, duration: 0.2, onComplete: () => {
-                addPanel.classList.add('hidden'); addPanel.classList.remove('flex');
-            }});
+        renderCustomSoundsUI();
+
+        // ========================================================
+        // 5. LÓGICA DO ESTÚDIO DE GRAVAÇÃO (MÁX 4 SEGUNDOS)
+        // ========================================================
+        const studioModal = document.getElementById('custom-sounds-studio');
+        const btnRecord = document.getElementById('btn-record-sound');
+        const recBtnText = document.getElementById('rec-btn-text');
+        const recIcon = document.getElementById('rec-icon');
+        const recProgressContainer = document.getElementById('rec-progress-container');
+        const recProgressBar = document.getElementById('rec-progress-bar');
+        const studioFeedback = document.getElementById('studio-feedback');
+
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecordingClip = false;
+        let recTimer = null;
+        let recInterval = null;
+        let recordingStream = null;
+        let autoWordRecognition = null;
+        let capturedSpokenWord = '';
+        const MAX_REC_TIME_MS = 4000; // Limite curto de 4 segundos
+
+        function setStudioFeedback(msg, isError = false) {
+            studioFeedback.innerText = msg;
+            studioFeedback.className = `text-xs font-bold mb-3 min-h-[1rem] ${isError ? 'text-red-500' : 'text-purple-600 dark:text-purple-400'}`;
+        }
+
+        function stopStudioMicStream() {
+            if (recordingStream) {
+                recordingStream.getTracks().forEach(track => track.stop());
+                recordingStream = null;
+            }
+            if (autoWordRecognition) {
+                try { autoWordRecognition.stop(); } catch(e) {}
+            }
+        }
+
+        // Abrir estúdio (pausa a leitura caso esteja ativa)
+        document.getElementById('btn-open-studio').addEventListener('click', () => {
+            if (isListening) {
+                isListening = false;
+                try { recognition.stop(); } catch(e) {}
+            }
+            studioModal.classList.remove('hidden');
+            studioModal.classList.add('flex');
+            gsap.fromTo(studioModal, { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1, duration: 0.25 });
+            setStudioFeedback('Pronto para gravar! Digite a palavra ou fale durante a gravação.');
         });
 
-        document.getElementById('btn-save-word').addEventListener('click', () => {
-            const word = document.getElementById('new-word').value.trim().toLowerCase();
-            const emoji = document.getElementById('new-emoji').value.trim();
-            const fileInput = document.getElementById('new-audio');
+        function closeStudioModal() {
+            if (isRecordingClip && mediaRecorder) {
+                mediaRecorder.stop();
+            }
+            stopStudioMicStream();
+            gsap.to(studioModal, {
+                opacity: 0, scale: 0.95, duration: 0.2, onComplete: () => {
+                    studioModal.classList.add('hidden');
+                    studioModal.classList.remove('flex');
+                }
+            });
+        }
 
-            if(!word || !emoji || fileInput.files.length === 0) return alert("Preencha todos os campos!");
-            if(fileInput.files[0].size > 2 * 1024 * 1024) return alert("Áudio deve ser menor que 2MB.");
+        document.getElementById('btn-close-studio').addEventListener('click', closeStudioModal);
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                customLibrary[word] = { audioSrc: e.target.result, emoji: emoji };
-                localStorage.setItem('livroMagicoCustomWords', JSON.stringify(customLibrary));
-                alert(`Encanto salvo: "${word}" 🪄`);
-                document.getElementById('new-word').value = '';
-                document.getElementById('new-emoji').value = '';
-                fileInput.value = '';
-                document.getElementById('btn-cancel-add').click();
-            };
-            reader.readAsDataURL(fileInput.files[0]);
+        // Botão Finalizar -> Fecha o estúdio e já inicia a leitura do livro!
+        document.getElementById('btn-finish-studio-and-read').addEventListener('click', () => {
+            closeStudioModal();
+            unlockMobileAudio();
+            setTimeout(() => {
+                if (!isListening && recognition) {
+                    try { recognition.start(); } catch(e) {}
+                }
+            }, 350);
         });
 
-        // 6. Configuração da Web Speech API
+        // Botão para ditar o nome da palavra-gatilho rapidamente
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        document.getElementById('btn-dictate-word').addEventListener('click', () => {
+            if (!SpeechRecognition) return alert('Seu navegador não suporta ditado por voz.');
+            const dictateRec = new SpeechRecognition();
+            dictateRec.lang = 'pt-BR';
+            dictateRec.interimResults = false;
+            setStudioFeedback('🗣️ Fale agora a palavra-gatilho...');
+            dictateRec.onresult = (e) => {
+                const spoken = e.results[0][0].transcript.trim().toLowerCase().replace(/[.,!?;:'"]/g, '').split(/\s+/)[0];
+                document.getElementById('studio-word').value = spoken;
+                setStudioFeedback(`Palavra definida: "${spoken}". Agora grave o som!`);
+            };
+            dictateRec.onerror = () => setStudioFeedback('Não consegui ouvir a palavra. Tente digitar.', true);
+            dictateRec.start();
+        });
+
+        // Gravar som com limite curto de 4 segundos
+        btnRecord.addEventListener('click', async () => {
+            if (isRecordingClip) {
+                // Para a gravação manualmente antes dos 4s
+                if (mediaRecorder && mediaRecorder.state === 'recording') {
+                    mediaRecorder.stop();
+                }
+                return;
+            }
+
+            try {
+                if (!recordingStream) {
+                    recordingStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                }
+
+                audioChunks = [];
+                capturedSpokenWord = '';
+                const typedWord = document.getElementById('studio-word').value.trim().toLowerCase();
+
+                // Se o usuário deixou o campo de texto vazio, tenta escutar a palavra falada durante o áudio
+                if (!typedWord && SpeechRecognition) {
+                    try {
+                        autoWordRecognition = new SpeechRecognition();
+                        autoWordRecognition.lang = 'pt-BR';
+                        autoWordRecognition.continuous = false;
+                        autoWordRecognition.interimResults = true;
+                        autoWordRecognition.onresult = (ev) => {
+                            const t = ev.results[0][0].transcript.trim().toLowerCase().replace(/[.,!?;:'"]/g, '');
+                            if (t) capturedSpokenWord = t.split(/\s+/)[0];
+                        };
+                        autoWordRecognition.start();
+                    } catch (e) {}
+                }
+
+                // Configura compressão leve (32kbps) para caber dezenas de áudios no localStorage
+                let options = { audioBitsPerSecond: 32000 };
+                if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+                    options.mimeType = 'audio/webm;codecs=opus';
+                } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+                    options.mimeType = 'audio/mp4';
+                }
+
+                mediaRecorder = new MediaRecorder(recordingStream, options);
+
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data && e.data.size > 0) audioChunks.push(e.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    isRecordingClip = false;
+                    clearTimeout(recTimer);
+                    clearInterval(recInterval);
+                    if (autoWordRecognition) {
+                        try { autoWordRecognition.stop(); } catch(e) {}
+                    }
+
+                    btnRecord.classList.remove('rec-active', 'bg-slate-800');
+                    btnRecord.classList.add('bg-red-500');
+                    recIcon.innerText = '🔴';
+                    recBtnText.innerText = 'Gravar Som (máx 4s)';
+                    recProgressContainer.classList.add('hidden');
+                    recProgressBar.style.width = '0%';
+
+                    const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        const base64Audio = reader.result;
+                        saveRecordedSound(base64Audio);
+                    };
+                    reader.readAsDataURL(audioBlob);
+                };
+
+                // Inicia gravação
+                mediaRecorder.start();
+                isRecordingClip = true;
+                btnRecord.classList.add('rec-active', 'bg-slate-800');
+                btnRecord.classList.remove('bg-red-500');
+                recIcon.innerText = '⏹️';
+                recProgressContainer.classList.remove('hidden');
+
+                let elapsed = 0;
+                setStudioFeedback('🎙️ Gravando som... Faça o efeito sonoro agora!');
+                recBtnText.innerText = 'Parar (4.0s)';
+
+                recInterval = setInterval(() => {
+                    elapsed += 100;
+                    const remaining = Math.max(0, (MAX_REC_TIME_MS - elapsed) / 1000).toFixed(1);
+                    const pct = Math.min(100, (elapsed / MAX_REC_TIME_MS) * 100);
+                    recProgressBar.style.width = `${pct}%`;
+                    recBtnText.innerText = `Parar (${remaining}s)`;
+                }, 100);
+
+                // Para automaticamente ao atingir o limite curto de 4 segundos
+                recTimer = setTimeout(() => {
+                    if (mediaRecorder && mediaRecorder.state === 'recording') {
+                        mediaRecorder.stop();
+                    }
+                }, MAX_REC_TIME_MS);
+
+            } catch (err) {
+                console.error(err);
+                setStudioFeedback('Permita o acesso ao microfone para gravar seus sons!', true);
+            }
+        });
+
+        function saveRecordedSound(base64Audio) {
+            let word = document.getElementById('studio-word').value.trim().toLowerCase().replace(/[.,!?;:'"]/g, '');
+            const emoji = document.getElementById('studio-emoji').value.trim() || '🔊';
+
+            // Se não digitou, usa a palavra captada no áudio ou pergunta rapidamente
+            if (!word) {
+                word = capturedSpokenWord;
+            }
+            if (!word) {
+                const prompted = prompt('Som gravado! Qual palavra da história vai ativar este som? (ex: espada, monstro, lobo)');
+                if (!prompted || !prompted.trim()) {
+                    setStudioFeedback('Gravação descartada porque nenhuma palavra foi informada.', true);
+                    return;
+                }
+                word = prompted.trim().toLowerCase().replace(/[.,!?;:'"]/g, '');
+            }
+
+            try {
+                customLibrary[word] = { audioSrc: base64Audio, emoji: emoji };
+                localStorage.setItem('livroMagicoCustomWords', JSON.stringify(customLibrary));
+                
+                // Toca o som recém-gravado para confirmar e limpa o campo para o próximo som
+                document.getElementById('studio-word').value = '';
+                renderCustomSoundsUI();
+                triggerEffect(word);
+                setStudioFeedback(`✅ Som "${word}" (${emoji}) salvo! Grave o próximo ou clique em Finalizar.`);
+            } catch (storageErr) {
+                alert('Memória do navegador cheia! Apague alguns sons antigos para gravar novos.');
+            }
+        }
+
+        // Opção secundária: enviar arquivo pronto do celular
+        document.getElementById('studio-file-upload').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (file.size > 1.5 * 1024 * 1024) {
+                alert('Escolha um áudio curto menor que 1.5MB.');
+                return;
+            }
+            // Se o campo palavra estiver vazio, usa o próprio nome do arquivo de áudio!
+            const wordInput = document.getElementById('studio-word');
+            if (!wordInput.value.trim()) {
+                const cleanFileName = file.name.replace(/\.[^/.]+$/, "").toLowerCase().replace(/[-_]/g, " ");
+                wordInput.value = cleanFileName;
+            }
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                saveRecordedSound(ev.target.result);
+                e.target.value = '';
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // ========================================================
+        // 6. RECONHECIMENTO DE VOZ DA LEITURA DO LIVRO
+        // ========================================================
         let recognition;
         let isListening = false;
-        let wordCooldowns = {}; // Evita que a mesma palavra toque repetidamente na mesma frase
+        let wordCooldowns = {};
 
         const immersiveEls = document.getElementById('immersive-elements');
         const animaArea = document.getElementById('anima-area');
@@ -311,19 +670,19 @@
 
             recognition.onstart = () => {
                 isListening = true;
+                stopStudioMicStream(); // Garante que o microfone do estúdio esteja fechado
                 requestWakeLock(); 
                 
                 const btn = document.getElementById('btn-mic');
                 btn.classList.add('mic-active', 'bg-slate-800', 'dark:bg-slate-700');
                 btn.classList.remove('bg-gradient-to-r', 'from-purple-600', 'to-indigo-600', 'hover:scale-105');
                 document.getElementById('btn-text').innerText = 'Pausar Leitura';
-                document.getElementById('status').innerText = 'Ouvindo... 🎙️';
+                document.getElementById('status').innerText = 'Ouvindo a leitura... 🎙️';
                 
                 toggleImmersiveMode(true);
             };
 
             recognition.onerror = (event) => {
-                console.warn("Aviso no microfone:", event.error);
                 if(event.error === 'not-allowed') {
                     isListening = false;
                     alert('Permita o acesso ao microfone no navegador para a mágica funcionar!');
@@ -338,7 +697,7 @@
                     const btn = document.getElementById('btn-mic');
                     btn.classList.remove('mic-active', 'bg-slate-800', 'dark:bg-slate-700');
                     btn.classList.add('bg-gradient-to-r', 'from-purple-600', 'to-indigo-600', 'hover:scale-105');
-                    document.getElementById('btn-text').innerText = 'Abrir Livro Mágico';
+                    document.getElementById('btn-text').innerText = 'Iniciar Leitura do Livro';
                     document.getElementById('status').innerText = 'Pausado';
                     toggleImmersiveMode(false);
                 }
@@ -360,7 +719,6 @@
                 
                 document.getElementById('interim-text').innerText = interimText;
 
-                // Dispara imediatamente tanto nas palavras ao vivo quanto nas finais!
                 const textToAnalyze = (interimText + ' ' + finalSentence).trim();
                 if (textToAnalyze.length > 0) {
                     processWords(textToAnalyze);
@@ -368,14 +726,12 @@
                     container.scrollTop = container.scrollHeight;
                 }
             };
-
-        } else {
-            alert("Atenção: A digitação por voz não é suportada neste navegador. Tente no Safari (iOS) ou Chrome.");
         }
 
-        // 7. Processamento de Palavras com Cooldown
+        // 7. Processamento de Palavras Faladas
         function processWords(sentence) {
-            const words = sentence.toLowerCase().replace(/[.,!?;:'"]/g, '').split(/\s+/);
+            const cleanSentence = sentence.toLowerCase().replace(/[.,!?;:'"]/g, '');
+            const words = cleanSentence.split(/\s+/);
             const combinedLibrary = { ...baseLibrary, ...customLibrary };
             const now = Date.now();
 
@@ -383,14 +739,12 @@
                 if (!word) return;
                 let targetWord = word;
 
-                // Trata plural simples (ex: "macacos" -> "macaco", "leões" -> "leão")
                 if (!combinedLibrary[targetWord]) {
                     if (targetWord === 'leões' || targetWord === 'leoes') targetWord = 'leão';
                     else if (targetWord.endsWith('s')) targetWord = targetWord.slice(0, -1);
                 }
 
                 if (combinedLibrary[targetWord]) {
-                    // Cooldown de 2.5 segundos por palavra para não tocar repetido enquanto a frase ainda está sendo falada
                     if (!wordCooldowns[targetWord] || (now - wordCooldowns[targetWord] > 2500)) {
                         wordCooldowns[targetWord] = now;
                         playSoundAndAnimate(targetWord, combinedLibrary[targetWord]);
@@ -399,7 +753,6 @@
             });
         }
 
-        // Função para os botões de teste rápido
         window.triggerEffect = function(word) {
             unlockMobileAudio();
             const combinedLibrary = { ...baseLibrary, ...customLibrary };
@@ -408,7 +761,7 @@
             }
         };
 
-        // 8. Reprodução com Fallback Automático de Extensão (.mp3 / .wav / .WAV)
+        // 8. Reprodução com Fallback Automático
         function showAudioFeedback(msg) {
             const fb = document.getElementById('audio-feedback');
             fb.innerText = msg;
@@ -418,14 +771,15 @@
         }
 
         function playSoundWithFallback(src, word) {
-            // Se for Base64 (upload do celular), toca direto
+            // Se for som gravado no estúdio (Base64), toca imediatamente
             if (src.startsWith('data:')) {
+                globalAudio.onerror = null;
+                globalAudio.onplaying = () => showAudioFeedback(`🔊 Som próprio: ${word}`);
                 globalAudio.src = src;
                 globalAudio.play().catch(err => console.error(err));
                 return;
             }
 
-            // Lista de tentativas caso o nome no GitHub tenha extensão ou maiúscula diferente
             const baseName = src.replace(/\.(mp3|wav|WAV)$/i, '');
             const fileNameOnly = baseName.split('/').pop();
             const capitalized = fileNameOnly.charAt(0).toUpperCase() + fileNameOnly.slice(1);
@@ -439,29 +793,23 @@
                 `./audios/${capitalized}.wav`,
                 `./audios/${capitalized}.WAV`
             ];
-            // Remove duplicados
             const uniqueCandidates = [...new Set(candidates)];
             let attemptIndex = 0;
 
             function tryNext() {
                 if (attemptIndex >= uniqueCandidates.length) {
-                    showAudioFeedback(`⚠️ Áudio de "${word}" não encontrado na pasta`);
+                    showAudioFeedback(`⚠️ Áudio de "${word}" não encontrado`);
                     return;
                 }
                 const currentCandidate = encodeURI(uniqueCandidates[attemptIndex]);
                 attemptIndex++;
 
-                globalAudio.onerror = () => {
-                    tryNext(); // Se deu erro 404 no GitHub, tenta a próxima variação automaticamente
-                };
-                globalAudio.onplaying = () => {
-                    showAudioFeedback(`🔊 Tocando: ${word}`);
-                };
+                globalAudio.onerror = () => tryNext();
+                globalAudio.onplaying = () => showAudioFeedback(`🔊 Tocando: ${word}`);
 
                 globalAudio.src = currentCandidate;
                 globalAudio.load();
                 globalAudio.play().catch(() => {
-                    // Se falhou por não encontrar ou bloqueio, tenta o próximo
                     if (globalAudio.error) tryNext();
                 });
             }
@@ -489,7 +837,7 @@
             });
         }
 
-        // 9. Controle do Botão Principal
+        // 9. Botão Principal de Iniciar Leitura
         document.getElementById('btn-mic').addEventListener('click', () => {
             if (isListening) {
                 isListening = false;
