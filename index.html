@@ -15,9 +15,8 @@
         }
     </script>
     
-    <!-- GSAP para animações modernas -->
+    <!-- GSAP & JSZip -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <!-- JSZip para baixar todos os sons gravados de lembrança em um único arquivo -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     
     <style>
@@ -38,16 +37,16 @@
         }
 
         .glass-panel {
-            background: rgba(255, 255, 255, 0.65);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
         }
         .dark .glass-panel {
-            background: rgba(15, 23, 42, 0.75);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.55);
         }
 
         .mic-active {
@@ -68,7 +67,7 @@
 
         .audio-bar {
             width: 4px;
-            background-color: #ef4444;
+            background-color: #a855f7;
             border-radius: 4px;
             animation: bounceBar 1s infinite ease-in-out alternate;
         }
@@ -78,83 +77,227 @@
         
         @keyframes bounceBar {
             0% { height: 4px; }
-            100% { height: 20px; }
+            100% { height: 22px; }
         }
 
-        ::-webkit-scrollbar { width: 6px; }
+        /* Spotlight do Tour Guiado */
+        #tour-spotlight {
+            position: fixed;
+            border-radius: 1.25rem;
+            box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.78), 0 0 0 4px #a855f7;
+            transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+            pointer-events: none;
+            z-index: 90;
+        }
+
+        ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         .dark ::-webkit-scrollbar-thumb { background: #475569; }
     </style>
 </head>
-<body class="bg-light-mode flex flex-col items-center justify-center p-4 md:p-6 font-sans text-gray-800 transition-colors duration-700">
+<body class="bg-light-mode flex flex-col items-center justify-center p-4 md:p-6 font-sans text-gray-800 dark:text-gray-100 transition-colors duration-700">
 
-    <div class="glass-panel p-5 md:p-10 rounded-[2.5rem] max-w-2xl w-full text-center relative overflow-hidden app-container opacity-0 translate-y-8">
+    <div class="glass-panel p-6 md:p-9 rounded-[2.5rem] max-w-xl w-full text-center relative overflow-hidden app-container opacity-0 translate-y-6">
         
-        <!-- Cabeçalho Principal -->
-        <div class="flex justify-between items-center mb-4">
-            <button id="btn-download-all-header" type="button" class="w-11 h-11 flex items-center justify-center rounded-full bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-700 text-purple-600 dark:text-purple-300 hover:scale-105 transition-all shadow-sm" title="Baixar todos os sons gravados de lembrança">
-                💾
+        <!-- CABEÇALHO MINIMALISTA -->
+        <header class="flex justify-between items-center mb-6">
+            <button id="btn-home" type="button" class="invisible w-11 h-11 flex items-center justify-center rounded-2xl bg-white/70 dark:bg-slate-800/70 hover:bg-white dark:hover:bg-slate-700 text-purple-600 dark:text-purple-300 shadow-sm transition-all active:scale-95" title="Voltar ao Início">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
             </button>
-            <h1 class="text-2xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-500 dark:from-purple-400 dark:to-indigo-300 tracking-tight">Livro Mágico ✨</h1>
-            <button id="btn-theme" class="w-11 h-11 flex items-center justify-center rounded-full bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-700 text-amber-500 hover:scale-105 transition-all shadow-sm" title="Modo Noturno">
+
+            <h1 class="text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-500 dark:from-purple-400 dark:to-indigo-300 tracking-tight select-none">
+                Livro Mágico ✨
+            </h1>
+
+            <button id="btn-theme" type="button" class="w-11 h-11 flex items-center justify-center rounded-2xl bg-white/70 dark:bg-slate-800/70 hover:bg-white dark:hover:bg-slate-700 text-amber-500 shadow-sm transition-all active:scale-95" title="Alternar Tema">
                 <svg id="icon-moon" class="w-5 h-5 block dark:hidden text-indigo-600" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
                 <svg id="icon-sun" class="w-5 h-5 hidden dark:block" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path></svg>
             </button>
-        </div>
+        </header>
 
-        <!-- 3 Botões no Topo (Sempre visíveis, inclusive durante a leitura) -->
-        <div class="grid grid-cols-3 gap-2 p-1.5 bg-white/50 dark:bg-slate-800/60 rounded-2xl border border-white/60 dark:border-slate-700 mb-2 shadow-sm">
-            <button id="btn-mode-app" type="button" class="py-2.5 px-2 rounded-xl font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-1.5 bg-purple-600 text-white shadow-md">
-                <span>🎵</span>
-                <span>Sons do app</span>
+        <!-- ========================================================= -->
+        <!-- VIEW 1: TELA INICIAL (APENAS 3 BOTÕES GRANDES E CLAROS)   -->
+        <!-- ========================================================= -->
+        <main id="view-home" class="flex flex-col gap-4 py-2">
+            <!-- Botão 1: Ler um livro qualquer -->
+            <button id="btn-home-read-any" type="button" class="group w-full p-6 rounded-3xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-xl shadow-purple-500/25 flex items-center gap-5 text-left transition-all hover:scale-[1.02] active:scale-[0.98]">
+                <div class="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center text-4xl shrink-0 group-hover:scale-110 transition-transform">
+                    📖
+                </div>
+                <div>
+                    <span class="block text-xl md:text-2xl font-extrabold tracking-tight">Ler um livro qualquer</span>
+                    <span class="block text-xs md:text-sm text-purple-100 font-medium mt-0.5">Abrir o palco mágico e ler agora</span>
+                </div>
             </button>
-            <button id="btn-mode-custom" type="button" class="py-2.5 px-2 rounded-xl font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-1.5 text-gray-700 dark:text-gray-300 hover:bg-white/60 dark:hover:bg-slate-700/60">
-                <span>🎧</span>
-                <span>Sons Gravados</span>
-                <span id="custom-count-badge" class="bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200 px-1.5 py-0.5 rounded-full text-[10px] font-extrabold hidden">0</span>
-            </button>
-            <button id="btn-open-studio" type="button" class="py-2.5 px-2 rounded-xl font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-1.5 text-purple-700 dark:text-purple-300 bg-purple-100/70 dark:bg-slate-700/70 hover:bg-purple-200/70 dark:hover:bg-slate-600">
-                <span>🎙️</span>
-                <span>Gravar sons</span>
-            </button>
-        </div>
 
-        <!-- Indicador sutil do modo de som atual -->
-        <p id="active-mode-label" class="text-[11px] font-semibold text-purple-700 dark:text-purple-300 mb-3">
-            Modo atual: Usando sons do aplicativo
-        </p>
+            <!-- Botão 2: Cadastrar um livro -->
+            <button id="btn-home-register-book" type="button" class="group w-full p-6 rounded-3xl bg-white/85 dark:bg-slate-800/85 hover:bg-white dark:hover:bg-slate-800 border-2 border-purple-200 dark:border-slate-700 shadow-lg flex items-center gap-5 text-left transition-all hover:scale-[1.02] active:scale-[0.98]">
+                <div class="w-16 h-16 rounded-2xl bg-purple-100 dark:bg-purple-950 flex items-center justify-center text-4xl shrink-0 group-hover:scale-110 transition-transform">
+                    ✨
+                </div>
+                <div class="flex-1 min-w-0">
+                    <span class="block text-xl md:text-2xl font-extrabold text-gray-800 dark:text-white tracking-tight">Cadastrar um livro</span>
+                    <span id="home-books-summary" class="block text-xs md:text-sm text-gray-500 dark:text-gray-400 font-medium mt-0.5 truncate">Criar histórias e gravar sons próprios</span>
+                </div>
+            </button>
 
-        <!-- Barra de Seleção / Cadastro de Livro (Obrigatório antes de ler) -->
-        <div class="flex flex-wrap items-center justify-between gap-2 p-3 mb-4 rounded-2xl bg-white/60 dark:bg-slate-800/70 border border-purple-200/70 dark:border-slate-700 shadow-sm">
-            <div class="flex items-center gap-2 text-left min-w-0 flex-1">
-                <span class="text-xl">📚</span>
-                <div class="truncate">
-                    <span class="text-[10px] uppercase tracking-wider font-bold text-gray-400 dark:text-gray-400 block">Livro Selecionado:</span>
-                    <span id="current-book-title" class="text-sm md:text-base font-extrabold text-purple-700 dark:text-purple-300 truncate block">Nenhum livro selecionado</span>
+            <!-- Botão 3: Fazer um tour -->
+            <button id="btn-home-tour" type="button" class="group w-full p-5 rounded-3xl bg-white/55 dark:bg-slate-800/50 hover:bg-white/80 dark:hover:bg-slate-800/80 border border-white/60 dark:border-slate-700 flex items-center gap-5 text-left transition-all hover:scale-[1.01] active:scale-[0.98]">
+                <div class="w-14 h-14 rounded-2xl bg-amber-100 dark:bg-amber-950/60 flex items-center justify-center text-3xl shrink-0 group-hover:rotate-12 transition-transform">
+                    🪄
+                </div>
+                <div>
+                    <span class="block text-lg md:text-xl font-extrabold text-gray-700 dark:text-gray-200">Fazer um tour</span>
+                    <span class="block text-xs text-gray-500 dark:text-gray-400 font-medium">Aprenda como funciona em 30 segundos</span>
+                </div>
+            </button>
+        </main>
+
+        <!-- ========================================================= -->
+        <!-- VIEW 2: PALCO DE LEITURA (LIMPO E SEM POLUIÇÃO VISUAL)    -->
+        <!-- ========================================================= -->
+        <section id="view-reader" class="hidden flex-col">
+            <!-- Barra Compacta de Contexto (Livro + Fonte de Som) -->
+            <div id="reader-context-bar" class="flex items-center justify-between gap-2 p-2.5 mb-4 rounded-2xl bg-white/70 dark:bg-slate-800/70 border border-white/60 dark:border-slate-700 shadow-sm">
+                <button id="btn-reader-pick-book" type="button" class="flex items-center gap-2 text-left min-w-0 flex-1 px-2 py-1 rounded-xl hover:bg-purple-50 dark:hover:bg-slate-700/60 transition-colors">
+                    <span class="text-xl shrink-0">📚</span>
+                    <div class="truncate">
+                        <span id="reader-book-title" class="text-sm font-extrabold text-purple-700 dark:text-purple-300 truncate block">Leitura Livre</span>
+                        <span class="text-[10px] text-gray-500 dark:text-gray-400 block">Toque para trocar de livro</span>
+                    </div>
+                </button>
+
+                <!-- Alternador Limpo de Modo de Som -->
+                <div id="reader-sound-toggle" class="flex items-center bg-gray-100 dark:bg-slate-900 p-1 rounded-xl shrink-0">
+                    <button id="btn-mode-app" type="button" class="px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all bg-purple-600 text-white shadow-sm">
+                        🎵 App
+                    </button>
+                    <button id="btn-mode-custom" type="button" class="px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all text-gray-600 dark:text-gray-300 flex items-center gap-1">
+                        <span>🎧 Meus</span>
+                        <span id="custom-count-badge" class="bg-purple-200 text-purple-800 dark:bg-purple-900 dark:text-purple-200 px-1.5 rounded-full text-[10px] hidden">0</span>
+                    </button>
                 </div>
             </div>
-            <div class="flex items-center gap-1.5">
-                <button id="btn-open-book-modal" type="button" class="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-sm transition-all flex items-center gap-1">
-                    <span>📖 Escolher / Cadastrar Livro</span>
-                </button>
+
+            <!-- Palco do Emoji -->
+            <div id="anima-area" class="h-52 md:h-64 flex items-center justify-center mb-4 bg-white/50 dark:bg-slate-800/50 rounded-3xl border border-white/60 dark:border-slate-700 overflow-hidden relative shadow-inner transition-all duration-500">
+                <span id="emoji-display" class="text-8xl md:text-9xl opacity-0 transform scale-50 drop-shadow-xl select-none">✨</span>
+                
+                <div id="audio-feedback" class="absolute top-3 left-4 text-xs font-bold text-purple-700 dark:text-purple-300 bg-white/80 dark:bg-slate-900/80 px-3 py-1 rounded-full opacity-0 transition-opacity duration-300"></div>
+
+                <div id="listening-indicator" class="absolute bottom-4 right-4 flex items-end gap-1 opacity-0 transition-opacity duration-500 h-6">
+                    <div class="audio-bar"></div>
+                    <div class="audio-bar"></div>
+                    <div class="audio-bar"></div>
+                    <div class="audio-bar"></div>
+                </div>
             </div>
-        </div>
+
+            <!-- Botões Rápidos de Teste -->
+            <div id="quick-test-bar" class="mb-4 flex flex-wrap items-center justify-center gap-1.5 text-xs"></div>
+
+            <!-- Nuvem de Palavras (Aparece ao finalizar leitura ou abrir livro já lido) -->
+            <div id="wordcloud-section" class="hidden mb-4 p-4 bg-white/85 dark:bg-slate-800/90 rounded-3xl border border-purple-200 dark:border-slate-700 shadow-md text-left">
+                <div class="flex justify-between items-center mb-2">
+                    <div>
+                        <h3 class="font-extrabold text-purple-700 dark:text-purple-300 text-xs md:text-sm">☁️ Palavras da História</h3>
+                        <p id="wordcloud-stats" class="text-[11px] text-gray-500 dark:text-gray-400"></p>
+                    </div>
+                    <button id="btn-close-wordcloud" type="button" class="text-xs text-gray-400 hover:text-gray-600 font-bold px-2 py-1">Fechar ×</button>
+                </div>
+                <div id="wordcloud-canvas" class="flex flex-wrap items-center justify-center gap-2 py-3 px-2 min-h-[5rem] bg-purple-50/60 dark:bg-slate-900/60 rounded-2xl"></div>
+            </div>
+
+            <!-- Transcrição Compacta -->
+            <div id="transcript-box" class="mb-5 text-left">
+                <div class="flex justify-between items-center mb-1.5 px-1">
+                    <span id="status" class="text-xs font-bold text-purple-600 dark:text-purple-400">Pronto para ouvir</span>
+                    <button id="btn-clear-transcript" type="button" class="text-xs text-gray-400 hover:text-red-500 hidden">Limpar texto</button>
+                </div>
+                <div id="transcript-container" class="w-full h-20 p-3 bg-white/60 dark:bg-slate-800/60 rounded-2xl text-sm text-gray-700 dark:text-gray-200 overflow-y-auto italic border border-white/50 dark:border-slate-700 shadow-inner">
+                    <span id="final-text"></span>
+                    <span id="interim-text" class="text-purple-600 dark:text-purple-400 font-semibold"></span>
+                </div>
+            </div>
+
+            <!-- Botão Gigante de Leitura -->
+            <button id="btn-mic" type="button" class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-extrabold py-5 px-8 rounded-3xl text-lg md:text-xl transition-all shadow-xl shadow-purple-500/30 flex items-center justify-center gap-3 w-full hover:scale-[1.02] active:scale-[0.98]">
+                <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clip-rule="evenodd"></path></svg>
+                <span id="btn-text">Iniciar Leitura</span>
+            </button>
+        </section>
 
         <!-- ========================================================= -->
-        <!-- MODAL 1: COMPLEMENTAR COM SONS DO APP?                    -->
+        <!-- VIEW 3: CADASTRAR LIVRO & MEUS SONS (ORGANIZADO EM ETAPAS)-->
         <!-- ========================================================= -->
-        <div id="fallback-modal" class="hidden absolute inset-0 bg-slate-900/60 backdrop-blur-md z-40 p-6 flex-col justify-center items-center rounded-[2.5rem]">
+        <section id="view-books" class="hidden flex-col text-left">
+            <!-- Barra Superior de Ferramentas de Áudio -->
+            <div class="flex items-center justify-between gap-2 mb-4">
+                <span class="text-xs font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400">Biblioteca & Sons</span>
+                <div class="flex items-center gap-2">
+                    <button id="btn-open-studio" type="button" class="px-3.5 py-2 rounded-xl bg-purple-100 dark:bg-slate-800 text-purple-700 dark:text-purple-300 font-extrabold text-xs hover:bg-purple-200 transition-all">
+                        🎙️ Gravar Som Rápido
+                    </button>
+                    <button id="btn-download-all-sounds" type="button" class="px-3 py-2 rounded-xl bg-indigo-100 dark:bg-slate-800 text-indigo-700 dark:text-indigo-300 font-extrabold text-xs hover:bg-indigo-200 transition-all hidden" title="Baixar todos os sons gravados de lembrança">
+                        💾 .ZIP
+                    </button>
+                </div>
+            </div>
+
+            <!-- Meus Livros Salvos + Opção de Leitura Livre -->
+            <div class="mb-4">
+                <div id="saved-books-list" class="flex flex-wrap gap-2 max-h-28 overflow-y-auto p-2.5 rounded-2xl bg-white/60 dark:bg-slate-800/60 border border-white/60 dark:border-slate-700"></div>
+            </div>
+
+            <!-- Cartão de Cadastro / Edição do Livro -->
+            <div id="book-editor-card" class="bg-white/80 dark:bg-slate-800/80 p-4 md:p-5 rounded-3xl border border-purple-200 dark:border-slate-700 shadow-sm mb-4">
+                <label class="block text-xs font-extrabold uppercase text-purple-700 dark:text-purple-300 mb-1.5">1. Nome do Livro</label>
+                <div class="flex gap-2 mb-4">
+                    <input type="text" id="book-title-input" placeholder="Ex: Os Três Porquinhos" class="flex-1 p-3.5 rounded-2xl border border-purple-200 dark:border-slate-600 bg-white dark:bg-slate-900 dark:text-white text-sm font-bold focus:outline-none focus:ring-2 focus:ring-purple-400">
+                    <button id="btn-save-book-title" type="button" class="px-5 py-3 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-xs shadow-md transition-all">
+                        Salvar
+                    </button>
+                </div>
+
+                <label class="block text-xs font-extrabold uppercase text-purple-700 dark:text-purple-300 mb-1.5">2. Palavras Mágicas do Livro</label>
+                <div class="flex flex-wrap gap-2 mb-3">
+                    <button id="btn-speak-multiple-words" type="button" class="flex-1 py-3 px-4 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-extrabold text-xs shadow-md flex items-center justify-center gap-2 transition-all active:scale-95">
+                        <span>🗣️</span>
+                        <span id="multi-word-btn-text">Ditar Palavras</span>
+                    </button>
+                    <div class="flex gap-1.5 flex-1 min-w-[160px]">
+                        <input type="text" id="manual-book-word" placeholder="Ou digite..." class="flex-1 p-3 rounded-2xl border border-purple-200 dark:border-slate-600 bg-white dark:bg-slate-900 dark:text-white text-xs font-semibold">
+                        <button id="btn-add-manual-word" type="button" class="px-4 py-2 rounded-2xl bg-gray-200 dark:bg-slate-700 text-gray-800 dark:text-gray-200 font-extrabold text-xs">+</button>
+                    </div>
+                </div>
+
+                <p id="book-multiword-feedback" class="text-xs font-bold text-purple-600 dark:text-purple-400 mb-2 min-h-[1rem]"></p>
+
+                <!-- Lista de Palavras do Livro -->
+                <div id="book-words-list" class="max-h-44 overflow-y-auto space-y-2 p-2.5 rounded-2xl bg-gray-50/80 dark:bg-slate-900/60 border border-purple-100 dark:border-slate-700 min-h-[4.5rem]"></div>
+            </div>
+
+            <!-- Botão Gigante para Ler o Livro Cadastrado -->
+            <button id="btn-confirm-book-and-read" type="button" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold py-4 px-6 rounded-3xl shadow-lg shadow-emerald-500/25 text-base flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.98]">
+                <span>📖 Ler este Livro Agora</span>
+            </button>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- MODAL: COMPLEMENTAR COM SONS DO APP?                      -->
+        <!-- ========================================================= -->
+        <div id="fallback-modal" class="hidden absolute inset-0 bg-slate-900/70 backdrop-blur-md z-40 p-6 flex-col justify-center items-center rounded-[2.5rem]">
             <div class="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-3xl max-w-md w-full shadow-2xl border border-purple-100 dark:border-slate-700 text-center">
                 <div class="text-4xl mb-3">🎧 + 🎵</div>
-                <h3 class="text-xl font-extrabold text-gray-800 dark:text-white mb-2">Usar sons existentes no app?</h3>
+                <h3 class="text-xl font-extrabold text-gray-800 dark:text-white mb-2">Completar com sons do app?</h3>
                 <p class="text-sm text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
-                    Você escolheu usar seus <strong>Sons Gravados</strong>. Caso você leia alguma palavra que ainda não gravou, deseja que o aplicativo toque os sons padrão existentes no app?
+                    Se você ler uma palavra que ainda não gravou, deseja tocar os sons padrão do aplicativo?
                 </p>
-                <div class="flex flex-col gap-2.5">
-                    <button id="btn-fallback-yes" type="button" class="w-full py-3.5 px-4 rounded-xl font-bold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-lg shadow-purple-500/30 transition-all">
-                        Sim, completar com sons do app
+                <div class="flex flex-col gap-3">
+                    <button id="btn-fallback-yes" type="button" class="w-full py-4 px-4 rounded-2xl font-extrabold text-white bg-gradient-to-r from-purple-600 to-indigo-600 shadow-lg transition-all">
+                        Sim, usar meus sons + sons do app
                     </button>
-                    <button id="btn-fallback-no" type="button" class="w-full py-3.5 px-4 rounded-xl font-bold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 transition-all">
+                    <button id="btn-fallback-no" type="button" class="w-full py-4 px-4 rounded-2xl font-extrabold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-slate-700 transition-all">
                         Não, tocar apenas o que eu gravei
                     </button>
                 </div>
@@ -162,284 +305,211 @@
         </div>
 
         <!-- ========================================================= -->
-        <!-- MODAL 2: ESCOLHER ESCOPO AO GRAVAR SOM (LIVRO X GLOBAL)   -->
+        <!-- MODAL: ESCOLHER ESCOPO AO GRAVAR SOM (LIVRO X GLOBAL)     -->
         <!-- ========================================================= -->
-        <div id="scope-choice-modal" class="hidden absolute inset-0 bg-slate-900/70 backdrop-blur-md z-50 p-6 flex-col justify-center items-center rounded-[2.5rem]">
-            <div class="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-3xl max-w-md w-full shadow-2xl border border-purple-200 dark:border-slate-700 text-center">
+        <div id="scope-choice-modal" class="hidden absolute inset-0 bg-slate-900/75 backdrop-blur-md z-50 p-6 flex-col justify-center items-center rounded-[2.5rem]">
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl max-w-md w-full shadow-2xl border border-purple-200 dark:border-slate-700 text-center">
                 <div class="text-4xl mb-2">🎯</div>
-                <h3 class="text-xl font-extrabold text-gray-800 dark:text-white mb-2">Onde usar este som?</h3>
-                <p id="scope-modal-desc" class="text-xs md:text-sm text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-                    Escolha se o som gravado será utilizado apenas em um livro específico cadastrado ou em todas as leituras:
-                </p>
+                <h3 class="text-xl font-extrabold text-gray-800 dark:text-white mb-1">Onde usar este som?</h3>
+                <p id="scope-modal-desc" class="text-xs text-gray-500 dark:text-gray-300 mb-4"></p>
 
-                <!-- Opção A: Livro específico -->
                 <div class="bg-purple-50 dark:bg-slate-900/80 p-4 rounded-2xl border border-purple-200 dark:border-slate-700 mb-3 text-left">
-                    <label class="block text-xs font-extrabold uppercase text-purple-700 dark:text-purple-300 mb-2">📚 Usar em um Livro Cadastrado:</label>
-                    <select id="scope-book-select" class="w-full p-2.5 rounded-xl border border-purple-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-800 dark:text-white text-sm font-semibold mb-2.5 focus:outline-none">
-                    </select>
-                    <button id="btn-save-scope-book" type="button" class="w-full py-3 px-4 rounded-xl font-bold text-white bg-purple-600 hover:bg-purple-700 shadow-md transition-all text-xs md:text-sm">
-                        Salvar apenas neste Livro
+                    <select id="scope-book-select" class="w-full p-3 rounded-xl border border-purple-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-800 dark:text-white text-sm font-bold mb-2.5 focus:outline-none"></select>
+                    <button id="btn-save-scope-book" type="button" class="w-full py-3.5 px-4 rounded-xl font-extrabold text-white bg-purple-600 hover:bg-purple-700 shadow-md text-xs md:text-sm">
+                        📚 Salvar apenas neste Livro
                     </button>
                 </div>
 
-                <!-- Opção B: Todas as leituras (Global) -->
-                <button id="btn-save-scope-global" type="button" class="w-full py-3.5 px-4 rounded-xl font-bold text-indigo-700 dark:text-indigo-200 bg-indigo-100 dark:bg-indigo-950/70 hover:bg-indigo-200 border border-indigo-200 dark:border-indigo-800 transition-all text-xs md:text-sm mb-2">
-                    🌍 Usar em Todas as Leituras (Todos os Livros)
+                <button id="btn-save-scope-global" type="button" class="w-full py-3.5 px-4 rounded-xl font-extrabold text-indigo-700 dark:text-indigo-200 bg-indigo-100 dark:bg-indigo-950/70 hover:bg-indigo-200 text-xs md:text-sm mb-2">
+                    🌍 Usar em Todos os Livros
                 </button>
 
                 <button id="btn-cancel-scope" type="button" class="text-xs text-gray-400 hover:text-gray-600 mt-1 py-1">
-                    Cancelar gravação
+                    Cancelar
                 </button>
             </div>
         </div>
 
         <!-- ========================================================= -->
-        <!-- MODAL 3: CADASTRAR / SELECIONAR LIVRO E FALAR PALAVRAS    -->
+        <!-- MODAL: ESTÚDIO DE GRAVAÇÃO RÁPIDA & SONS GLOBAIS          -->
         <!-- ========================================================= -->
-        <div id="book-manager-modal" class="hidden absolute inset-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl z-40 p-5 md:p-8 flex-col justify-between items-center rounded-[2.5rem] overflow-y-auto text-left">
+        <div id="custom-sounds-studio" class="hidden absolute inset-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl z-30 p-6 flex-col justify-between items-center rounded-[2.5rem] overflow-y-auto">
             <div class="w-full">
-                <div class="flex justify-between items-center mb-3">
-                    <h2 class="text-xl md:text-2xl font-extrabold text-purple-600 dark:text-purple-400">📚 Meus Livros Mágicos</h2>
-                    <button id="btn-close-book-modal" type="button" class="text-xs font-bold text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-slate-800">Fechar ×</button>
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-extrabold text-purple-600 dark:text-purple-400">🎙️ Gravar Som Rápido</h2>
+                    <button id="btn-close-studio" type="button" class="px-3 py-1.5 rounded-xl bg-gray-100 dark:bg-slate-800 text-xs font-extrabold text-gray-600 dark:text-gray-300">Fechar ×</button>
                 </div>
 
-                <!-- Lista de Livros já cadastrados -->
-                <div class="mb-5">
-                    <label class="block text-xs font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">Livros Cadastrados (Toque para selecionar):</label>
-                    <div id="saved-books-list" class="flex flex-wrap gap-2 max-h-28 overflow-y-auto p-2.5 rounded-2xl bg-gray-50 dark:bg-slate-800/60 border border-gray-200 dark:border-slate-700">
-                    </div>
-                </div>
-
-                <!-- Formulário de Cadastro / Edição do Livro -->
-                <div class="bg-purple-50/70 dark:bg-slate-800/70 p-4 rounded-2xl border border-purple-200 dark:border-slate-700 mb-4">
-                    <h3 id="book-form-title" class="text-sm md:text-base font-extrabold text-purple-700 dark:text-purple-300 mb-2">✨ Cadastrar ou Editar Livro</h3>
-                    
-                    <div class="flex gap-2 mb-3">
-                        <input type="text" id="book-title-input" placeholder="Nome do livro (ex: Os Três Porquinhos)" class="flex-1 p-3 rounded-xl border border-purple-200 dark:border-slate-600 bg-white dark:bg-slate-900 dark:text-white text-sm font-bold focus:outline-none focus:ring-2 focus:ring-purple-400">
-                        <button id="btn-save-book-title" type="button" class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-sm transition-all">
-                            Salvar Nome
-                        </button>
-                    </div>
-
-                    <!-- Instruções Passo a Passo -->
-                    <div class="p-3 rounded-xl bg-white/80 dark:bg-slate-900/70 border border-purple-100 dark:border-slate-700 text-xs text-gray-600 dark:text-gray-300 mb-3 leading-relaxed">
-                        <p class="font-extrabold text-purple-700 dark:text-purple-300 mb-1">📋 Como cadastrar palavras e sons para este livro:</p>
-                        <ol class="list-decimal list-inside space-y-0.5 text-[11px]">
-                            <li>Digite o nome do livro acima e toque em <strong>Salvar Nome</strong>.</li>
-                            <li>Toque em <strong>"🗣️ Falar Várias Palavras"</strong> e diga pausadamente as palavras da história que terão efeitos (ex: <em>"lobo, porquinho, sopro, caldeirão"</em>).</li>
-                            <li>Para cada palavra captada abaixo, toque no botão vermelho circular para gravar o som exclusivo deste livro!</li>
-                            <li>Se quiser usar um som deste livro em todas as outras histórias, toque em <strong>"🌍 Mover p/ Todos"</strong>.</li>
-                        </ol>
-                    </div>
-
-                    <!-- Controles para Falar Várias Palavras ou Digitar -->
-                    <div class="flex flex-wrap gap-2 mb-3">
-                        <button id="btn-speak-multiple-words" type="button" class="flex-1 py-2.5 px-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold text-xs shadow-md flex items-center justify-center gap-1.5 transition-all">
-                            <span id="multi-word-icon">🗣️</span>
-                            <span id="multi-word-btn-text">Falar Várias Palavras</span>
-                        </button>
-                        <div class="flex gap-1 flex-1 min-w-[160px]">
-                            <input type="text" id="manual-book-word" placeholder="Ou digite palavra..." class="flex-1 p-2 rounded-xl border border-purple-200 dark:border-slate-600 bg-white dark:bg-slate-900 dark:text-white text-xs">
-                            <button id="btn-add-manual-word" type="button" class="px-3 py-2 rounded-xl bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-200 font-bold text-xs">+ Add</button>
-                        </div>
-                    </div>
-
-                    <p id="book-multiword-feedback" class="text-xs font-bold text-purple-600 dark:text-purple-400 mb-2 min-h-[1rem]"></p>
-
-                    <!-- Lista de Palavras Faladas do Livro para Gravar ou Mover p/ Todos -->
-                    <div>
-                        <label class="block text-[11px] font-bold uppercase text-gray-500 dark:text-gray-400 mb-1.5">Palavras e Sons deste Livro:</label>
-                        <div id="book-words-list" class="max-h-44 overflow-y-auto space-y-2 p-2 rounded-xl bg-white/70 dark:bg-slate-900/50 border border-purple-100 dark:border-slate-700 min-h-[4rem]">
-                            <span class="text-xs text-gray-400 italic block text-center py-4">Salve ou selecione um livro acima para adicionar palavras.</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="w-full flex flex-col gap-2">
-                <button id="btn-confirm-book-and-read" type="button" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold py-4 rounded-full shadow-lg text-sm md:text-base flex items-center justify-center gap-2 transition-all">
-                    <span>📖 Selecionar Livro e Voltar para a Tela do Livro</span>
-                </button>
-            </div>
-        </div>
-
-        <!-- ========================================================= -->
-        <!-- ESTÚDIO DE SONS PRÓPRIOS (GRAVAÇÃO RÁPIDA)                -->
-        <!-- ========================================================= -->
-        <div id="custom-sounds-studio" class="hidden absolute inset-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl z-30 p-5 md:p-8 flex-col justify-between items-center rounded-[2.5rem] overflow-y-auto">
-            <div class="w-full">
-                <div class="flex justify-between items-center mb-2">
-                    <h2 class="text-xl md:text-2xl font-extrabold text-purple-600 dark:text-purple-400">🎙️ Gravar Sons</h2>
-                    <span class="text-xs font-semibold px-3 py-1 rounded-full bg-purple-100 dark:bg-slate-800 text-purple-700 dark:text-purple-300">Máx 4s por som</span>
-                </div>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mb-3 text-left">
-                    Digite ou fale a palavra, toque no botão circular vermelho para gravar e depois escolha se o som valerá para um livro específico ou para todas as leituras.
-                </p>
-
-                <!-- Passo 1: Nome da Palavra e Emoji -->
-                <div class="bg-purple-50/70 dark:bg-slate-800/70 p-4 rounded-2xl border border-purple-100 dark:border-slate-700 mb-4">
+                <div class="bg-purple-50/80 dark:bg-slate-800/80 p-4 rounded-3xl border border-purple-100 dark:border-slate-700 mb-4">
                     <div class="flex gap-2 mb-3">
                         <div class="relative flex-1">
-                            <input type="text" id="studio-word" placeholder="Palavra-gatilho (ou fale no 🗣️)" class="w-full p-3 pr-10 rounded-xl border border-purple-200 dark:border-slate-600 bg-white dark:bg-slate-900 dark:text-white text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-purple-400">
-                            <button id="btn-dictate-word" type="button" title="Falar nome da palavra" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-lg bg-purple-100 dark:bg-slate-700 text-purple-600 dark:text-purple-300 hover:bg-purple-200">
+                            <input type="text" id="studio-word" placeholder="Palavra-gatilho..." class="w-full p-3.5 pr-11 rounded-2xl border border-purple-200 dark:border-slate-600 bg-white dark:bg-slate-900 dark:text-white text-sm font-bold focus:outline-none">
+                            <button id="btn-dictate-word" type="button" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-xl bg-purple-100 dark:bg-slate-700 text-purple-600 dark:text-purple-300">
                                 🗣️
                             </button>
                         </div>
-                        <input type="text" id="studio-emoji" value="🔊" placeholder="Emoji" class="w-16 p-3 rounded-xl border border-purple-200 dark:border-slate-600 bg-white dark:bg-slate-900 dark:text-white text-xl text-center focus:outline-none focus:ring-2 focus:ring-purple-400">
+                        <input type="text" id="studio-emoji" value="🔊" class="w-16 p-3 rounded-2xl border border-purple-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-xl text-center">
                     </div>
 
-                    <!-- Emojis Rápidos -->
                     <div class="flex items-center justify-between gap-1 text-lg mb-3 overflow-x-auto py-1">
-                        <span class="text-xs text-gray-400 mr-1">Emoji:</span>
-                        <button type="button" onclick="selectEmoji('🔊')" class="hover:scale-125 transition-transform">🔊</button>
-                        <button type="button" onclick="selectEmoji('💥')" class="hover:scale-125 transition-transform">💥</button>
-                        <button type="button" onclick="selectEmoji('👹')" class="hover:scale-125 transition-transform">👹</button>
-                        <button type="button" onclick="selectEmoji('🦖')" class="hover:scale-125 transition-transform">🦖</button>
-                        <button type="button" onclick="selectEmoji('🧚')" class="hover:scale-125 transition-transform">🧚</button>
-                        <button type="button" onclick="selectEmoji('🐉')" class="hover:scale-125 transition-transform">🐉</button>
-                        <button type="button" onclick="selectEmoji('🐶')" class="hover:scale-125 transition-transform">🐶</button>
-                        <button type="button" onclick="selectEmoji('😂')" class="hover:scale-125 transition-transform">😂</button>
-                        <button type="button" onclick="selectEmoji('🚗')" class="hover:scale-125 transition-transform">🚗</button>
-                        <button type="button" onclick="selectEmoji('⚡')" class="hover:scale-125 transition-transform">⚡</button>
+                        <button type="button" onclick="selectEmoji('🔊')">🔊</button>
+                        <button type="button" onclick="selectEmoji('💥')">💥</button>
+                        <button type="button" onclick="selectEmoji('👹')">👹</button>
+                        <button type="button" onclick="selectEmoji('🦖')">🦖</button>
+                        <button type="button" onclick="selectEmoji('🧚')">🧚</button>
+                        <button type="button" onclick="selectEmoji('🐉')">🐉</button>
+                        <button type="button" onclick="selectEmoji('🐶')">🐶</button>
+                        <button type="button" onclick="selectEmoji('😂')">😂</button>
+                        <button type="button" onclick="selectEmoji('🚗')">🚗</button>
+                        <button type="button" onclick="selectEmoji('⚡')">⚡</button>
                     </div>
 
-                    <!-- Barra de Progresso de Gravação (4 segundos) -->
-                    <div id="rec-progress-container" class="hidden w-full bg-gray-200 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden mb-3">
+                    <div id="rec-progress-container" class="hidden w-full bg-gray-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden mb-3">
                         <div id="rec-progress-bar" class="bg-red-500 h-full w-0 transition-all duration-100"></div>
                     </div>
 
                     <div id="studio-feedback" class="text-xs font-bold text-purple-600 dark:text-purple-400 mb-3 min-h-[1rem]"></div>
 
-                    <!-- Botão de Gravar: Branco com borda vermelha e círculo vermelho no centro -->
                     <div class="flex items-center justify-center gap-6 py-1">
-                        <button id="btn-record-sound" type="button" title="Gravar Som (máx 4s)" class="w-16 h-16 rounded-full bg-white border-4 border-red-500 flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all">
+                        <button id="btn-record-sound" type="button" class="w-16 h-16 rounded-full bg-white border-4 border-red-500 flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all">
                             <span id="rec-inner-circle" class="w-7 h-7 rounded-full bg-red-500 transition-all duration-200"></span>
                         </button>
 
-                        <label class="cursor-pointer bg-white dark:bg-slate-700 hover:bg-gray-100 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-slate-600 font-semibold py-3 px-4 rounded-xl text-xs flex items-center justify-center shadow-sm" title="Ou envie um arquivo do celular">
+                        <label class="cursor-pointer bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 font-bold py-3.5 px-4 rounded-2xl text-xs flex items-center justify-center shadow-sm">
                             📁 Arquivo
                             <input type="file" id="studio-file-upload" accept="audio/*" class="hidden">
                         </label>
                     </div>
                 </div>
 
-                <!-- Lista de Sons Gravados (Deste Livro + Globais) e Botão de Lembrança -->
-                <div class="text-left mb-3">
-                    <div class="flex flex-wrap justify-between items-center gap-2 mb-2">
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Seus Sons Gravados:</h3>
-                        <div class="flex items-center gap-3">
-                            <button id="btn-download-all-sounds" type="button" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 hidden">
-                                <span>💾 Baixar todos de lembrança (.zip)</span>
-                            </button>
-                            <button id="btn-clear-custom" type="button" class="text-xs text-red-500 hover:underline hidden">Apagar todos</button>
-                        </div>
+                <!-- Lista de Sons Gravados -->
+                <div class="text-left">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs font-extrabold uppercase text-gray-500">Todos os Sons Gravados</span>
+                        <button id="btn-clear-custom" type="button" class="text-xs text-red-500 font-bold hidden">Apagar tudo</button>
                     </div>
-                    <div id="custom-sounds-list" class="max-h-36 overflow-y-auto flex flex-wrap gap-2 p-2 rounded-xl bg-gray-50 dark:bg-slate-800/50 border border-gray-200/60 dark:border-slate-700 min-h-[3.5rem] items-center">
-                        <span class="text-xs text-gray-400 italic mx-auto">Nenhum som próprio gravado ainda.</span>
-                    </div>
+                    <div id="custom-sounds-list" class="max-h-36 overflow-y-auto flex flex-wrap gap-2 p-2.5 rounded-2xl bg-gray-50 dark:bg-slate-800/50 border border-gray-200/60 dark:border-slate-700 min-h-[3.5rem] items-center"></div>
                 </div>
             </div>
 
-            <!-- Rodapé do Estúdio: Finalizar e Voltar -->
-            <div class="w-full flex flex-col gap-2 mt-1">
-                <button id="btn-finish-studio-and-read" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold py-3.5 rounded-full shadow-lg shadow-emerald-500/30 text-sm md:text-base flex items-center justify-center gap-2 transition-all">
-                    <span>✅ Finalizar e Iniciar Leitura do Livro</span>
-                </button>
-                <button id="btn-close-studio" class="w-full text-xs md:text-sm font-semibold text-gray-600 dark:text-gray-300 py-2 hover:text-purple-600 dark:hover:text-purple-400 flex items-center justify-center gap-1.5 transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                    <span>Voltar para a tela inicial</span>
-                </button>
-            </div>
+            <button id="btn-finish-studio-and-read" type="button" class="w-full mt-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-extrabold py-4 rounded-3xl shadow-lg text-sm">
+                ✅ Concluir e Ir para Leitura
+            </button>
         </div>
-
-        <p class="text-gray-600 dark:text-gray-300 mb-3 font-medium text-xs md:text-sm" id="subtitle">Cadastre ou escolha um livro acima e leia em voz alta!</p>
-
-        <!-- Palco do Emoji -->
-        <div id="anima-area" class="h-48 md:h-56 flex items-center justify-center mb-5 bg-white/40 dark:bg-slate-800/40 rounded-3xl border border-white/50 dark:border-slate-600/50 overflow-hidden relative shadow-inner transition-all duration-700 ease-in-out">
-            <span id="emoji-display" class="text-8xl md:text-9xl opacity-0 transform scale-50 drop-shadow-xl select-none">✨</span>
-            
-            <!-- Feedback de Status do Som no Palco -->
-            <div id="audio-feedback" class="absolute top-3 left-4 text-xs font-semibold text-purple-600 dark:text-purple-300 opacity-0 transition-opacity duration-300"></div>
-
-            <!-- Indicador de Ouvindo Moderno -->
-            <div id="listening-indicator" class="absolute bottom-4 right-4 flex items-end gap-1 opacity-0 transition-opacity duration-500 h-6">
-                <div class="audio-bar"></div>
-                <div class="audio-bar"></div>
-                <div class="audio-bar"></div>
-                <div class="audio-bar"></div>
-            </div>
-        </div>
-        
-        <!-- ELEMENTOS DE LEITURA (Visíveis fora do modo imersivo) -->
-        <div id="immersive-elements" class="transition-all duration-500 overflow-hidden">
-            <!-- Botões rápidos de teste de som -->
-            <div id="quick-test-bar" class="mb-4 flex flex-wrap items-center justify-center gap-1.5 text-xs"></div>
-
-            <!-- Nuvem de Palavras (Exibida ao entrar num livro já lido ou após finalizar a leitura) -->
-            <div id="wordcloud-section" class="hidden mb-5 p-4 bg-white/75 dark:bg-slate-800/80 rounded-3xl border border-purple-200 dark:border-slate-700 shadow-md text-left transition-all">
-                <div class="flex justify-between items-start mb-2">
-                    <div>
-                        <h3 class="font-extrabold text-purple-700 dark:text-purple-300 text-xs md:text-sm flex items-center gap-1.5">
-                            <span>☁️ Nuvem de Palavras do Livro</span>
-                        </h3>
-                        <p id="wordcloud-stats" class="text-[11px] text-gray-500 dark:text-gray-400"></p>
-                        <p class="text-[10px] text-purple-600 dark:text-purple-300 font-semibold mt-0.5">💡 Toque em uma palavra para ouvir ou toque em 🎙️ para gravar um som para ela!</p>
-                    </div>
-                    <button id="btn-close-wordcloud" type="button" class="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 font-bold px-2 py-1">Fechar ×</button>
-                </div>
-                <div id="wordcloud-canvas" class="flex flex-wrap items-center justify-center gap-x-2.5 gap-y-2 py-3 px-2 min-h-[6rem] bg-gradient-to-br from-purple-50/60 to-indigo-50/60 dark:from-slate-900/60 dark:to-purple-950/30 rounded-2xl border border-white/50 dark:border-slate-700/50"></div>
-            </div>
-
-            <!-- Log de Transcrição Ao Vivo -->
-            <div class="mb-5 text-left relative">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="font-bold text-gray-700 dark:text-gray-300 text-xs uppercase tracking-wider">Lendo agora:</h3>
-                    <div class="flex items-center gap-3">
-                        <button id="btn-clear-transcript" type="button" class="text-xs text-gray-400 hover:text-red-500 hidden">Limpar histórico do livro</button>
-                        <span id="status" class="text-xs font-medium text-purple-600 dark:text-purple-400">Pronto para começar</span>
-                    </div>
-                </div>
-                <div id="transcript-container" class="w-full h-24 p-3.5 bg-white/60 dark:bg-slate-800/60 rounded-2xl text-sm md:text-base text-gray-700 dark:text-gray-200 overflow-y-auto italic border border-white/40 dark:border-slate-600 shadow-inner leading-relaxed">
-                    <span id="final-text"></span>
-                    <span id="interim-text" class="text-purple-600 dark:text-purple-400 font-semibold"></span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Botão Principal -->
-        <button id="btn-mic" class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-4 md:py-5 px-8 md:px-10 rounded-full text-lg md:text-xl transition-all shadow-xl shadow-purple-500/30 flex items-center justify-center mx-auto gap-3 mt-1 w-full md:w-auto z-10 relative group hover:scale-105">
-            <svg class="w-6 h-6 group-hover:animate-bounce" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clip-rule="evenodd"></path></svg>
-            <span id="btn-text">Iniciar Leitura do Livro</span>
-        </button>
 
     </div>
 
+    <!-- ========================================================= -->
+    <!-- OVERLAY DO TOUR GUIADO INTERATIVO (SPOTLIGHT)             -->
+    <!-- ========================================================= -->
+    <div id="tour-overlay" class="hidden fixed inset-0 z-[85] pointer-events-auto">
+        <!-- Máscara de Recorte (Spotlight) -->
+        <div id="tour-spotlight"></div>
+
+        <!-- Cartão Explicativo Flutuante -->
+        <div id="tour-tooltip" class="fixed z-[95] w-[90%] max-w-sm bg-white dark:bg-slate-800 p-5 rounded-3xl shadow-2xl border-2 border-purple-400 text-left transition-all duration-300">
+            <div class="flex justify-between items-center mb-2">
+                <span id="tour-step-badge" class="text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-200">Passo 1 de 7</span>
+                <button id="btn-tour-skip" type="button" class="text-xs font-bold text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">Pular tour ×</button>
+            </div>
+            <h3 id="tour-title" class="text-lg font-extrabold text-gray-800 dark:text-white mb-1.5"></h3>
+            <p id="tour-desc" class="text-xs md:text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-4"></p>
+            <div class="flex justify-between items-center gap-2">
+                <button id="btn-tour-prev" type="button" class="px-4 py-2.5 rounded-xl bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-200 font-bold text-xs">
+                    ← Anterior
+                </button>
+                <button id="btn-tour-next" type="button" class="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-extrabold text-xs shadow-md">
+                    Próximo →
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        gsap.to(".app-container", { opacity: 1, y: 0, duration: 1, ease: "power3.out" });
+        gsap.to(".app-container", { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" });
 
-        // 1. Dark Mode
-        const btnTheme = document.getElementById('btn-theme');
-        const body = document.body;
+        // =========================================================================
+        // 1. NAVEGAÇÃO ENTRE AS 3 TELAS PRINCIPAIS (HOME, LEITURA, LIVROS)
+        // =========================================================================
+        const viewHome = document.getElementById('view-home');
+        const viewReader = document.getElementById('view-reader');
+        const viewBooks = document.getElementById('view-books');
+        const btnHome = document.getElementById('btn-home');
+        let currentView = 'home';
 
-        btnTheme.addEventListener('click', () => {
-            document.documentElement.classList.toggle('dark');
-            body.classList.toggle('bg-dark-mode');
-            body.classList.toggle('bg-light-mode');
+        function navigateTo(viewName) {
+            if (isListening && viewName !== 'reader') {
+                isListening = false;
+                try { recognition.stop(); } catch(e) {}
+            }
+            if (isCapturingMultiWords && multiWordRecognition) {
+                isCapturingMultiWords = false;
+                try { multiWordRecognition.stop(); } catch(e) {}
+            }
+            stopStudioMicStream();
+
+            currentView = viewName;
+            viewHome.classList.add('hidden');
+            viewReader.classList.add('hidden');
+            viewReader.classList.remove('flex');
+            viewBooks.classList.add('hidden');
+            viewBooks.classList.remove('flex');
+
+            if (viewName === 'home') {
+                viewHome.classList.remove('hidden');
+                btnHome.classList.add('invisible');
+                updateHomeSummary();
+            } else if (viewName === 'reader') {
+                viewReader.classList.remove('hidden');
+                viewReader.classList.add('flex');
+                btnHome.classList.remove('invisible');
+                updateActiveBookHeader();
+                updateModeButtonsUI();
+            } else if (viewName === 'books') {
+                viewBooks.classList.remove('hidden');
+                viewBooks.classList.add('flex');
+                btnHome.classList.remove('invisible');
+                renderBookManagerUI();
+                renderCustomSoundsUI();
+            }
+        }
+
+        btnHome.addEventListener('click', () => navigateTo('home'));
+
+        document.getElementById('btn-home-read-any').addEventListener('click', () => {
+            navigateTo('reader');
         });
 
-        // 2. Wake Lock API
+        document.getElementById('btn-home-register-book').addEventListener('click', () => {
+            navigateTo('books');
+        });
+
+        document.getElementById('btn-reader-pick-book').addEventListener('click', () => {
+            navigateTo('books');
+        });
+
+        // =========================================================================
+        // 2. DARK MODE & WAKE LOCK
+        // =========================================================================
+        document.getElementById('btn-theme').addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            document.body.classList.toggle('bg-dark-mode');
+            document.body.classList.toggle('bg-light-mode');
+        });
+
         let wakeLock = null;
         async function requestWakeLock() {
             if ('wakeLock' in navigator) {
-                try { wakeLock = await navigator.wakeLock.request('screen'); } 
-                catch (err) { console.log(err.message); }
+                try { wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {}
             }
         }
         function releaseWakeLock() {
             if (wakeLock !== null) { wakeLock.release().then(() => { wakeLock = null; }); }
         }
 
-        // 3. Reprodutor de Áudio Único Destravado para Mobile
+        // =========================================================================
+        // 3. REPRODUTOR DE ÁUDIO DESTRAVADO PARA MOBILE
+        // =========================================================================
         const globalAudio = new Audio();
         globalAudio.playsInline = true;
         let audioCtx = null;
@@ -459,7 +529,7 @@
         }
 
         // =========================================================================
-        // 4. ESTRUTURA DE DADOS: SONS DO APP, SONS GLOBAIS E LIVROS CADASTRADOS
+        // 4. DADOS: SONS DO APP, SONS GLOBAIS E LIVROS CADASTRADOS
         // =========================================================================
         const baseLibrary = {
             'leão': { audioSrc: './audios/Leão.WAV', emoji: '🦁' },
@@ -494,45 +564,21 @@
             'aviao': { audioSrc: './audios/aviao.mp3', emoji: '✈️' }
         };
 
-        // Sons gravados para TODAS as leituras (Global)
         let globalCustomSounds = JSON.parse(localStorage.getItem('livroMagicoCustomWords')) || {};
-        // Dicionário de Livros Cadastrados: { [bookId]: { id, title, transcript, plannedWords: [], sounds: { [word]: { audioSrc, emoji } } } }
         let booksLibrary = JSON.parse(localStorage.getItem('livroMagicoBooks')) || {};
         let activeBookId = localStorage.getItem('livroMagicoActiveBookId') || '';
         if (activeBookId && !booksLibrary[activeBookId]) activeBookId = '';
 
-        let soundMode = 'app'; 
+        let freeReadingTranscript = localStorage.getItem('livroMagicoFreeTranscript') || '';
+        let soundMode = getTotalRecordedSoundsCount() > 0 ? 'custom' : 'app';
         let useAppFallback = true;
 
         function saveAllStorage() {
             localStorage.setItem('livroMagicoCustomWords', JSON.stringify(globalCustomSounds));
             localStorage.setItem('livroMagicoBooks', JSON.stringify(booksLibrary));
             localStorage.setItem('livroMagicoActiveBookId', activeBookId);
-        }
-
-        // =========================================================================
-        // REGRA DE HIERARQUIA DE SONS:
-        // 1º Som gravado para o livro específico -> 2º Som gravado para todos -> 3º Som do App
-        // =========================================================================
-        function resolveSoundWithHierarchy(word) {
-            if (soundMode === 'app') {
-                if (baseLibrary[word]) return { ...baseLibrary[word], origin: 'Som do app' };
-                return null;
-            }
-            // Modo Sons Gravados (ou quando o usuário usa sons personalizados):
-            // 1º Prioridade: Som gravado especificamente para o livro ativo
-            if (activeBookId && booksLibrary[activeBookId] && booksLibrary[activeBookId].sounds && booksLibrary[activeBookId].sounds[word]) {
-                return { ...booksLibrary[activeBookId].sounds[word], origin: `Som do livro "${booksLibrary[activeBookId].title}"` };
-            }
-            // 2º Prioridade: Som gravado para qualquer livro (Global)
-            if (globalCustomSounds[word]) {
-                return { ...globalCustomSounds[word], origin: 'Som global (Todos os livros)' };
-            }
-            // 3º Prioridade: Som nativo do app (se o fallback estiver ativo)
-            if (useAppFallback && baseLibrary[word]) {
-                return { ...baseLibrary[word], origin: 'Som do app' };
-            }
-            return null;
+            localStorage.setItem('livroMagicoFreeTranscript', freeReadingTranscript);
+            updateHomeSummary();
         }
 
         function getTotalRecordedSoundsCount() {
@@ -543,8 +589,38 @@
             return count;
         }
 
+        function updateHomeSummary() {
+            const bookCount = Object.keys(booksLibrary).length;
+            const soundCount = getTotalRecordedSoundsCount();
+            const el = document.getElementById('home-books-summary');
+            if (bookCount === 0 && soundCount === 0) {
+                el.innerText = 'Criar histórias e gravar sons próprios';
+            } else {
+                el.innerText = `${bookCount} livro(s) • ${soundCount} som(ns) gravado(s)`;
+            }
+        }
+
         // =========================================================================
-        // 5. DOWNLOAD DE SONS GRAVADOS PARA GUARDAR DE LEMBRANÇA
+        // HIERARQUIA DE SONS: 1º Livro Específico -> 2º Global -> 3º Sons do App
+        // =========================================================================
+        function resolveSoundWithHierarchy(word) {
+            if (soundMode === 'app') {
+                return baseLibrary[word] ? { ...baseLibrary[word], origin: 'Som do app' } : null;
+            }
+            if (activeBookId && booksLibrary[activeBookId]?.sounds?.[word]) {
+                return { ...booksLibrary[activeBookId].sounds[word], origin: booksLibrary[activeBookId].title };
+            }
+            if (globalCustomSounds[word]) {
+                return { ...globalCustomSounds[word], origin: 'Som global' };
+            }
+            if (useAppFallback && baseLibrary[word]) {
+                return { ...baseLibrary[word], origin: 'Som do app' };
+            }
+            return null;
+        }
+
+        // =========================================================================
+        // 5. DOWNLOAD DE LEMBRANÇAS (.ZIP / INDIVIDUAL)
         // =========================================================================
         function getExtensionFromDataUrl(dataUrl) {
             if (!dataUrl || !dataUrl.startsWith('data:')) return 'webm';
@@ -556,14 +632,8 @@
         }
 
         window.downloadSingleSound = function(word, scopeKey) {
-            let item = null;
-            let prefix = 'Todos_os_Livros';
-            if (scopeKey === 'GLOBAL') {
-                item = globalCustomSounds[word];
-            } else if (booksLibrary[scopeKey] && booksLibrary[scopeKey].sounds) {
-                item = booksLibrary[scopeKey].sounds[word];
-                prefix = booksLibrary[scopeKey].title.replace(/[^a-zA-Z0-9À-ÿ]/g, '_');
-            }
+            let item = scopeKey === 'GLOBAL' ? globalCustomSounds[word] : booksLibrary[scopeKey]?.sounds?.[word];
+            let prefix = scopeKey === 'GLOBAL' ? 'Todos_os_Livros' : (booksLibrary[scopeKey]?.title || 'Livro').replace(/[^a-zA-Z0-9À-ÿ]/g, '_');
             if (!item || !item.audioSrc) return;
 
             const ext = getExtensionFromDataUrl(item.audioSrc);
@@ -576,44 +646,28 @@
         };
 
         async function downloadAllRecordedSoundsAsKeepsake() {
-            const total = getTotalRecordedSoundsCount();
-            if (total === 0) {
-                alert('Você ainda não tem nenhum som próprio gravado para baixar de lembrança!');
-                return;
-            }
-
+            if (getTotalRecordedSoundsCount() === 0) return;
             if (typeof JSZip === 'undefined') {
-                // Fallback caso JSZip não carregue: baixa individualmente
                 Object.keys(globalCustomSounds).forEach(w => window.downloadSingleSound(w, 'GLOBAL'));
-                Object.keys(booksLibrary).forEach(bId => {
-                    Object.keys(booksLibrary[bId].sounds || {}).forEach(w => window.downloadSingleSound(w, bId));
-                });
+                Object.keys(booksLibrary).forEach(bId => Object.keys(booksLibrary[bId].sounds || {}).forEach(w => window.downloadSingleSound(w, bId)));
                 return;
             }
-
             const zip = new JSZip();
-            // Adiciona sons globais
             Object.keys(globalCustomSounds).forEach(word => {
                 const item = globalCustomSounds[word];
-                if (item.audioSrc && item.audioSrc.includes(',')) {
-                    const base64Data = item.audioSrc.split(',')[1];
-                    const ext = getExtensionFromDataUrl(item.audioSrc);
-                    zip.file(`Todos_os_Livros/${word}.${ext}`, base64Data, { base64: true });
+                if (item.audioSrc?.includes(',')) {
+                    zip.file(`Todos_os_Livros/${word}.${getExtensionFromDataUrl(item.audioSrc)}`, item.audioSrc.split(',')[1], { base64: true });
                 }
             });
-            // Adiciona sons de cada livro
             Object.values(booksLibrary).forEach(book => {
                 const folderName = book.title.replace(/[^a-zA-Z0-9À-ÿ _-]/g, '').trim() || 'Livro';
                 Object.keys(book.sounds || {}).forEach(word => {
                     const item = book.sounds[word];
-                    if (item.audioSrc && item.audioSrc.includes(',')) {
-                        const base64Data = item.audioSrc.split(',')[1];
-                        const ext = getExtensionFromDataUrl(item.audioSrc);
-                        zip.file(`Livro_${folderName}/${word}.${ext}`, base64Data, { base64: true });
+                    if (item.audioSrc?.includes(',')) {
+                        zip.file(`Livro_${folderName}/${word}.${getExtensionFromDataUrl(item.audioSrc)}`, item.audioSrc.split(',')[1], { base64: true });
                     }
                 });
             });
-
             const content = await zip.generateAsync({ type: 'blob' });
             const url = URL.createObjectURL(content);
             const a = document.createElement('a');
@@ -626,34 +680,28 @@
         }
 
         document.getElementById('btn-download-all-sounds').addEventListener('click', downloadAllRecordedSoundsAsKeepsake);
-        document.getElementById('btn-download-all-header').addEventListener('click', downloadAllRecordedSoundsAsKeepsake);
 
         // =========================================================================
-        // 6. GERENCIAMENTO DE MODOS E ATUALIZAÇÃO DE INTERFACE
+        // 6. ALTERNADOR DE MODO DE SOM & RENDERIZAÇÃO DE CHIPS
         // =========================================================================
         const btnModeApp = document.getElementById('btn-mode-app');
         const btnModeCustom = document.getElementById('btn-mode-custom');
-        const activeModeLabel = document.getElementById('active-mode-label');
         const fallbackModal = document.getElementById('fallback-modal');
 
         function updateModeButtonsUI() {
-            const activeClasses = ['bg-purple-600', 'text-white', 'shadow-md'];
-            const inactiveClasses = ['text-gray-700', 'dark:text-gray-300', 'hover:bg-white/60', 'dark:hover:bg-slate-700/60'];
+            const activeCls = ['bg-purple-600', 'text-white', 'shadow-sm'];
+            const inactiveCls = ['text-gray-600', 'dark:text-gray-300'];
 
             if (soundMode === 'app') {
-                btnModeApp.classList.add(...activeClasses);
-                btnModeApp.classList.remove(...inactiveClasses);
-                btnModeCustom.classList.remove(...activeClasses);
-                btnModeCustom.classList.add(...inactiveClasses);
-                activeModeLabel.innerText = 'Modo atual: Usando sons do aplicativo';
+                btnModeApp.classList.add(...activeCls);
+                btnModeApp.classList.remove(...inactiveCls);
+                btnModeCustom.classList.remove(...activeCls);
+                btnModeCustom.classList.add(...inactiveCls);
             } else {
-                btnModeCustom.classList.add(...activeClasses);
-                btnModeCustom.classList.remove(...inactiveClasses);
-                btnModeApp.classList.remove(...activeClasses);
-                btnModeApp.classList.add(...inactiveClasses);
-                activeModeLabel.innerText = useAppFallback 
-                    ? 'Hierarquia ativa: 1º Som do Livro → 2º Som Global → 3º Som do App' 
-                    : 'Hierarquia ativa: 1º Som do Livro → 2º Som Global (Sem sons do app)';
+                btnModeCustom.classList.add(...activeCls);
+                btnModeCustom.classList.remove(...inactiveCls);
+                btnModeApp.classList.remove(...activeCls);
+                btnModeApp.classList.add(...inactiveCls);
             }
             renderCustomSoundsUI();
         }
@@ -661,13 +709,16 @@
         btnModeApp.addEventListener('click', () => {
             soundMode = 'app';
             updateModeButtonsUI();
-            showAudioFeedback('🎵 Modo: Sons do App ativado');
+            showAudioFeedback('🎵 Usando sons do app');
         });
 
         btnModeCustom.addEventListener('click', () => {
+            if (getTotalRecordedSoundsCount() === 0) {
+                openStudioForWord('');
+                return;
+            }
             fallbackModal.classList.remove('hidden');
             fallbackModal.classList.add('flex');
-            gsap.fromTo(fallbackModal, { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1, duration: 0.2 });
         });
 
         document.getElementById('btn-fallback-yes').addEventListener('click', () => {
@@ -676,7 +727,7 @@
             fallbackModal.classList.add('hidden');
             fallbackModal.classList.remove('flex');
             updateModeButtonsUI();
-            showAudioFeedback('🎧 Hierarquia completa ativada');
+            showAudioFeedback('🎧 Meus sons + sons do app');
         });
 
         document.getElementById('btn-fallback-no').addEventListener('click', () => {
@@ -685,32 +736,23 @@
             fallbackModal.classList.add('hidden');
             fallbackModal.classList.remove('flex');
             updateModeButtonsUI();
-            showAudioFeedback('🎧 Apenas Sons Gravados ativados');
+            showAudioFeedback('🎧 Apenas meus sons');
         });
 
-        // Mover/Promover som de um livro específico para TODOS os livros (Global) com aviso de sobrescrita
         window.moveBookSoundToGlobal = function(bookId, word) {
             const book = booksLibrary[bookId];
-            if (!book || !book.sounds || !book.sounds[word]) return;
-
-            if (globalCustomSounds[word]) {
-                const confirmOverwrite = confirm(`⚠️ Atenção: A palavra "${word}" já possui um som cadastrado para TODOS os livros.\n\nDeseja sobrescrever o som global pelo som gravado no livro "${book.title}"?`);
-                if (!confirmOverwrite) return;
-            }
-
+            if (!book?.sounds?.[word]) return;
+            if (globalCustomSounds[word] && !confirm(`Sobrescrever o som global existente de "${word}"?`)) return;
             globalCustomSounds[word] = { ...book.sounds[word] };
             saveAllStorage();
             renderCustomSoundsUI();
             renderBookManagerUI();
-            alert(`🌍 O som da palavra "${word}" agora está disponível para TODOS os livros!`);
+            showAudioFeedback(`🌍 "${word}" disponível em todos os livros!`);
         };
 
         window.deleteCustomSound = function(word, scopeKey) {
-            if (scopeKey === 'GLOBAL') {
-                delete globalCustomSounds[word];
-            } else if (booksLibrary[scopeKey] && booksLibrary[scopeKey].sounds) {
-                delete booksLibrary[scopeKey].sounds[word];
-            }
+            if (scopeKey === 'GLOBAL') delete globalCustomSounds[word];
+            else if (booksLibrary[scopeKey]?.sounds) delete booksLibrary[scopeKey].sounds[word];
             saveAllStorage();
             renderCustomSoundsUI();
             renderBookManagerUI();
@@ -724,7 +766,6 @@
             const quickBar = document.getElementById('quick-test-bar');
 
             const totalRecorded = getTotalRecordedSoundsCount();
-            
             if (totalRecorded > 0) {
                 badgeEl.innerText = totalRecorded;
                 badgeEl.classList.remove('hidden');
@@ -738,76 +779,73 @@
 
             listEl.innerHTML = '';
             if (totalRecorded === 0) {
-                listEl.innerHTML = '<span class="text-xs text-gray-400 italic mx-auto">Nenhum som próprio gravado ainda.</span>';
+                listEl.innerHTML = '<span class="text-xs text-gray-400 italic mx-auto">Nenhum som gravado ainda.</span>';
             } else {
-                // 1. Sons dos Livros
                 Object.values(booksLibrary).forEach(book => {
                     Object.keys(book.sounds || {}).forEach(word => {
                         const item = book.sounds[word];
                         const chip = document.createElement('div');
-                        chip.className = 'flex items-center gap-1 bg-purple-50 dark:bg-slate-900 border border-purple-300 dark:border-purple-700 px-2.5 py-1 rounded-full text-xs font-bold text-purple-900 dark:text-purple-200 shadow-sm';
+                        chip.className = 'flex items-center gap-1 bg-purple-50 dark:bg-slate-900 border border-purple-300 dark:border-purple-700 px-2.5 py-1 rounded-full text-xs font-bold text-purple-900 dark:text-purple-200';
                         chip.innerHTML = `
-                            <button type="button" onclick="playSpecificSound('${book.id}', '${word}')" class="hover:scale-105 flex items-center gap-1" title="Ouvir som do livro ${book.title}">
+                            <button type="button" onclick="playSpecificSound('${book.id}', '${word}')" class="flex items-center gap-1">
                                 <span>▶️</span><span>${item.emoji}</span><span>${word}</span>
-                                <span class="text-[9px] bg-purple-200 dark:bg-purple-800 px-1.5 py-0.2 rounded-full">📚 ${book.title}</span>
+                                <span class="text-[9px] bg-purple-200 dark:bg-purple-800 px-1.5 rounded-full">📚 ${book.title}</span>
                             </button>
-                            <button type="button" onclick="moveBookSoundToGlobal('${book.id}', '${word}')" class="text-[10px] bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-200 px-1.5 py-0.5 rounded-full hover:bg-indigo-200 ml-1" title="Mover para todos os livros">🌍 Todos</button>
-                            <button type="button" onclick="downloadSingleSound('${word}', '${book.id}')" class="text-xs hover:scale-110 ml-0.5" title="Baixar de lembrança">⬇️</button>
-                            <button type="button" onclick="deleteCustomSound('${word}', '${book.id}')" class="text-gray-400 hover:text-red-500 ml-0.5 font-extrabold" title="Excluir">×</button>
+                            <button type="button" onclick="moveBookSoundToGlobal('${book.id}', '${word}')" class="text-[10px] px-1" title="Usar em todos os livros">🌍</button>
+                            <button type="button" onclick="downloadSingleSound('${word}', '${book.id}')" class="text-xs" title="Baixar">⬇️</button>
+                            <button type="button" onclick="deleteCustomSound('${word}', '${book.id}')" class="text-gray-400 hover:text-red-500 font-extrabold ml-0.5">×</button>
                         `;
                         listEl.appendChild(chip);
                     });
                 });
 
-                // 2. Sons Globais
                 Object.keys(globalCustomSounds).forEach(word => {
                     const item = globalCustomSounds[word];
                     const chip = document.createElement('div');
-                    chip.className = 'flex items-center gap-1 bg-white dark:bg-slate-900 border border-indigo-200 dark:border-slate-600 px-2.5 py-1 rounded-full text-xs font-bold text-gray-700 dark:text-gray-200 shadow-sm';
+                    chip.className = 'flex items-center gap-1 bg-white dark:bg-slate-900 border border-indigo-200 dark:border-slate-600 px-2.5 py-1 rounded-full text-xs font-bold text-gray-700 dark:text-gray-200';
                     chip.innerHTML = `
-                        <button type="button" onclick="playSpecificSound('GLOBAL', '${word}')" class="hover:scale-105 flex items-center gap-1" title="Ouvir som global">
+                        <button type="button" onclick="playSpecificSound('GLOBAL', '${word}')" class="flex items-center gap-1">
                             <span>▶️</span><span>${item.emoji}</span><span>${word}</span>
-                            <span class="text-[9px] bg-indigo-100 dark:bg-slate-700 text-indigo-700 dark:text-indigo-300 px-1.5 py-0.2 rounded-full">🌍 Todos</span>
+                            <span class="text-[9px] bg-indigo-100 dark:bg-slate-700 px-1.5 rounded-full">🌍 Global</span>
                         </button>
-                        <button type="button" onclick="downloadSingleSound('${word}', 'GLOBAL')" class="text-xs hover:scale-110 ml-1" title="Baixar de lembrança">⬇️</button>
-                        <button type="button" onclick="deleteCustomSound('${word}', 'GLOBAL')" class="text-gray-400 hover:text-red-500 ml-0.5 font-extrabold" title="Excluir">×</button>
+                        <button type="button" onclick="downloadSingleSound('${word}', 'GLOBAL')" class="text-xs" title="Baixar">⬇️</button>
+                        <button type="button" onclick="deleteCustomSound('${word}', 'GLOBAL')" class="text-gray-400 hover:text-red-500 font-extrabold ml-0.5">×</button>
                     `;
                     listEl.appendChild(chip);
                 });
             }
 
-            // Barra de teste rápido na tela inicial (respeita a hierarquia do livro atual)
-            let quickHTML = '<span class="text-gray-500 dark:text-gray-400 font-medium">Testar:</span>';
+            // Botões de teste rápido na tela de leitura
+            let quickHTML = '';
             const shownWords = new Set();
 
             if (soundMode === 'custom') {
-                if (activeBookId && booksLibrary[activeBookId] && booksLibrary[activeBookId].sounds) {
+                if (activeBookId && booksLibrary[activeBookId]?.sounds) {
                     Object.keys(booksLibrary[activeBookId].sounds).forEach(w => {
                         const item = booksLibrary[activeBookId].sounds[w];
                         shownWords.add(w);
-                        quickHTML += `<button onclick="triggerEffect('${w}')" class="px-2.5 py-1 rounded-full bg-purple-600 text-white font-bold shadow-sm transition-all" title="Som exclusivo deste livro">${item.emoji} ${w} 📚</button>`;
+                        quickHTML += `<button type="button" onclick="triggerEffect('${w}')" class="px-3 py-1 rounded-full bg-purple-600 text-white font-bold shadow-sm">${item.emoji} ${w}</button>`;
                     });
                 }
                 Object.keys(globalCustomSounds).forEach(w => {
                     if (!shownWords.has(w)) {
                         const item = globalCustomSounds[w];
                         shownWords.add(w);
-                        quickHTML += `<button onclick="triggerEffect('${w}')" class="px-2.5 py-1 rounded-full bg-purple-100 dark:bg-purple-900/60 border border-purple-300 dark:border-purple-600 text-purple-800 dark:text-purple-200 font-bold shadow-sm transition-all" title="Som para todos os livros">${item.emoji} ${w}</button>`;
+                        quickHTML += `<button type="button" onclick="triggerEffect('${w}')" class="px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900/60 border border-purple-300 text-purple-800 dark:text-purple-200 font-bold">${item.emoji} ${w}</button>`;
                     }
                 });
             }
 
             if (soundMode === 'app' || useAppFallback) {
-                const defaultSamples = [
+                [
                     { w: 'leão', e: '🦁', label: 'Leão' },
                     { w: 'macaco', e: '🐵', label: 'Macaco' },
                     { w: 'gato', e: '🐱', label: 'Gato' },
-                    { w: 'galinha', e: '🐔', label: 'Galinha' },
-                    { w: 'pato', e: '🦆', label: 'Pato' }
-                ];
-                defaultSamples.forEach(s => {
+                    { w: 'chuva', e: '🌧️', label: 'Chuva' },
+                    { w: 'magia', e: '🪄', label: 'Magia' }
+                ].forEach(s => {
                     if (!shownWords.has(s.w)) {
-                        quickHTML += `<button onclick="triggerEffect('${s.w}')" class="px-2.5 py-1 rounded-full bg-white/70 dark:bg-slate-800/70 hover:bg-purple-100 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-200 font-semibold shadow-sm transition-all">${s.e} ${s.label}</button>`;
+                        quickHTML += `<button type="button" onclick="triggerEffect('${s.w}')" class="px-3 py-1 rounded-full bg-white/75 dark:bg-slate-800/75 hover:bg-purple-100 text-gray-700 dark:text-gray-200 font-semibold shadow-sm">${s.e} ${s.label}</button>`;
                     }
                 });
             }
@@ -816,15 +854,12 @@
 
         window.playSpecificSound = function(scopeKey, word) {
             unlockMobileAudio();
-            if (scopeKey === 'GLOBAL' && globalCustomSounds[word]) {
-                playSoundAndAnimate(word, globalCustomSounds[word]);
-            } else if (booksLibrary[scopeKey] && booksLibrary[scopeKey].sounds && booksLibrary[scopeKey].sounds[word]) {
-                playSoundAndAnimate(word, booksLibrary[scopeKey].sounds[word]);
-            }
+            if (scopeKey === 'GLOBAL' && globalCustomSounds[word]) playSoundAndAnimate(word, globalCustomSounds[word]);
+            else if (booksLibrary[scopeKey]?.sounds?.[word]) playSoundAndAnimate(word, booksLibrary[scopeKey].sounds[word]);
         };
 
         document.getElementById('btn-clear-custom').addEventListener('click', () => {
-            if (confirm('Deseja apagar todos os sons gravados (globais e dos livros)?')) {
+            if (confirm('Apagar todos os sons gravados?')) {
                 globalCustomSounds = {};
                 Object.values(booksLibrary).forEach(b => { b.sounds = {}; });
                 saveAllStorage();
@@ -834,50 +869,48 @@
         });
 
         // =========================================================================
-        // 7. CADASTRO DE LIVROS, CAPTURA DE VÁRIAS PALAVRAS E GRAVAÇÃO POR LIVRO
+        // 7. GERENCIAMENTO DE LIVROS E DITAR VÁRIAS PALAVRAS
         // =========================================================================
-        const bookModal = document.getElementById('book-manager-modal');
         const bookTitleInput = document.getElementById('book-title-input');
-        const currentBookTitleEl = document.getElementById('current-book-title');
         let multiWordRecognition = null;
         let isCapturingMultiWords = false;
         let inlineRecordingWord = null;
 
         function updateActiveBookHeader() {
+            const titleEl = document.getElementById('reader-book-title');
             if (activeBookId && booksLibrary[activeBookId]) {
                 const b = booksLibrary[activeBookId];
-                currentBookTitleEl.innerText = b.title;
-                document.getElementById('subtitle').innerText = `Livro ativo: "${b.title}"`;
-                // Carrega o histórico de leitura anterior desse livro e já mostra a Nuvem de Palavras!
+                titleEl.innerText = b.title;
                 fullReadingTranscript = b.transcript || '';
-                document.getElementById('final-text').innerText = fullReadingTranscript;
-                document.getElementById('interim-text').innerText = '';
-                if (fullReadingTranscript.trim().length > 0) {
-                    generateWordCloud();
-                } else {
-                    document.getElementById('wordcloud-section').classList.add('hidden');
-                }
             } else {
-                currentBookTitleEl.innerText = 'Nenhum livro selecionado (Cadastre antes de ler)';
-                document.getElementById('subtitle').innerText = 'Cadastre ou escolha um livro acima para iniciar a leitura!';
+                titleEl.innerText = 'Leitura Livre (Qualquer Livro)';
+                fullReadingTranscript = freeReadingTranscript;
+            }
+            document.getElementById('final-text').innerText = fullReadingTranscript;
+            document.getElementById('interim-text').innerText = '';
+            if (fullReadingTranscript.trim().length > 0) {
+                generateWordCloud();
+            } else {
+                document.getElementById('wordcloud-section').classList.add('hidden');
             }
             renderCustomSoundsUI();
         }
 
-        function selectBook(bookId) {
+        window.selectBook = function(bookId) {
             activeBookId = bookId;
             saveAllStorage();
-            const book = booksLibrary[bookId];
-            if (book) {
-                bookTitleInput.value = book.title;
-                if (Object.keys(book.sounds || {}).length > 0) {
+            if (bookId && booksLibrary[bookId]) {
+                bookTitleInput.value = booksLibrary[bookId].title;
+                if (Object.keys(booksLibrary[bookId].sounds || {}).length > 0) {
                     soundMode = 'custom';
-                    updateModeButtonsUI();
                 }
+            } else {
+                bookTitleInput.value = '';
             }
             updateActiveBookHeader();
+            updateModeButtonsUI();
             renderBookManagerUI();
-        }
+        };
 
         function createOrUpdateBookFromInput() {
             const title = bookTitleInput.value.trim();
@@ -885,29 +918,20 @@
                 alert('Digite o nome do livro primeiro!');
                 return null;
             }
-            // Verifica se já existe um livro com mesmo nome
             let existingId = Object.keys(booksLibrary).find(id => booksLibrary[id].title.toLowerCase() === title.toLowerCase());
             if (!existingId) {
                 existingId = 'book_' + Date.now();
-                booksLibrary[existingId] = {
-                    id: existingId,
-                    title: title,
-                    transcript: '',
-                    plannedWords: [],
-                    sounds: {}
-                };
+                booksLibrary[existingId] = { id: existingId, title, transcript: '', plannedWords: [], sounds: {} };
             } else {
                 booksLibrary[existingId].title = title;
             }
-            selectBook(existingId);
+            window.selectBook(existingId);
             return existingId;
         }
 
         document.getElementById('btn-save-book-title').addEventListener('click', () => {
             const id = createOrUpdateBookFromInput();
-            if (id) {
-                document.getElementById('book-multiword-feedback').innerText = `✅ Livro "${booksLibrary[id].title}" selecionado! Agora fale ou adicione as palavras dele abaixo.`;
-            }
+            if (id) document.getElementById('book-multiword-feedback').innerText = `✅ Livro "${booksLibrary[id].title}" salvo!`;
         });
 
         function renderBookManagerUI() {
@@ -915,68 +939,64 @@
             const wordsList = document.getElementById('book-words-list');
             const bookIds = Object.keys(booksLibrary);
 
-            if (bookIds.length === 0) {
-                savedList.innerHTML = '<span class="text-xs text-gray-400 italic">Nenhum livro cadastrado ainda. Digite o nome abaixo para criar o primeiro!</span>';
-            } else {
-                savedList.innerHTML = '';
-                bookIds.forEach(id => {
-                    const b = booksLibrary[id];
-                    const isSelected = id === activeBookId;
-                    const soundCount = Object.keys(b.sounds || {}).length;
-                    const btn = document.createElement('div');
-                    btn.className = `flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer transition-all border ${isSelected ? 'bg-purple-600 text-white border-purple-600 shadow-md' : 'bg-white dark:bg-slate-900 text-gray-700 dark:text-gray-200 border-purple-200 dark:border-slate-700 hover:bg-purple-50'}`;
-                    btn.innerHTML = `
-                        <span onclick="selectBook('${id}')">📘 ${b.title} (${soundCount} sons)</span>
-                        <button type="button" onclick="deleteBook('${id}')" class="ml-1 text-xs opacity-70 hover:opacity-100" title="Excluir livro">×</button>
-                    `;
-                    savedList.appendChild(btn);
-                });
-            }
+            savedList.innerHTML = '';
+            // Chip para Leitura Livre
+            const freeChip = document.createElement('button');
+            freeChip.type = 'button';
+            freeChip.onclick = () => window.selectBook('');
+            freeChip.className = `px-3 py-1.5 rounded-xl text-xs font-extrabold border transition-all ${!activeBookId ? 'bg-purple-600 text-white border-purple-600 shadow-sm' : 'bg-white dark:bg-slate-900 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-slate-700'}`;
+            freeChip.innerText = '✨ Leitura Livre';
+            savedList.appendChild(freeChip);
+
+            bookIds.forEach(id => {
+                const b = booksLibrary[id];
+                const isSelected = id === activeBookId;
+                const soundCount = Object.keys(b.sounds || {}).length;
+                const btn = document.createElement('div');
+                btn.className = `flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold cursor-pointer border transition-all ${isSelected ? 'bg-purple-600 text-white border-purple-600 shadow-sm' : 'bg-white dark:bg-slate-900 text-gray-700 dark:text-gray-200 border-purple-200 dark:border-slate-700'}`;
+                btn.innerHTML = `
+                    <span onclick="selectBook('${id}')">📘 ${b.title} (${soundCount})</span>
+                    <button type="button" onclick="deleteBook('${id}')" class="ml-1 opacity-70 hover:opacity-100">×</button>
+                `;
+                savedList.appendChild(btn);
+            });
 
             if (!activeBookId || !booksLibrary[activeBookId]) {
-                wordsList.innerHTML = '<span class="text-xs text-gray-400 italic block text-center py-4">Salve ou selecione um livro acima para cadastrar e gravar as palavras faladas.</span>';
+                bookTitleInput.value = '';
+                wordsList.innerHTML = '<span class="text-xs text-gray-400 italic block text-center py-4">Digite o nome de um novo livro acima ou escolha um já salvo.</span>';
                 return;
             }
 
             const currentBook = booksLibrary[activeBookId];
             bookTitleInput.value = currentBook.title;
-            const allBookWords = new Set([
-                ...(currentBook.plannedWords || []),
-                ...Object.keys(currentBook.sounds || {})
-            ]);
+            const allBookWords = new Set([...(currentBook.plannedWords || []), ...Object.keys(currentBook.sounds || {})]);
 
             if (allBookWords.size === 0) {
-                wordsList.innerHTML = '<span class="text-xs text-gray-400 italic block text-center py-4">Nenhuma palavra cadastrada neste livro ainda. Toque em "🗣️ Falar Várias Palavras" acima!</span>';
+                wordsList.innerHTML = '<span class="text-xs text-gray-400 italic block text-center py-4">Toque em "🗣️ Ditar Palavras" para adicionar os gatilhos deste livro.</span>';
             } else {
                 wordsList.innerHTML = '';
                 allBookWords.forEach(word => {
-                    const soundObj = currentBook.sounds ? currentBook.sounds[word] : null;
+                    const soundObj = currentBook.sounds?.[word];
                     const hasSound = Boolean(soundObj);
-                    const emoji = hasSound ? soundObj.emoji : '🔊';
-                    const isRecordingThis = (inlineRecordingWord === word);
+                    const isRecordingThis = inlineRecordingWord === word;
 
                     const row = document.createElement('div');
-                    row.className = 'flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl bg-gray-50 dark:bg-slate-800 border border-purple-100 dark:border-slate-700';
+                    row.className = 'flex items-center justify-between gap-2 p-2.5 rounded-2xl bg-white dark:bg-slate-800 border border-purple-100 dark:border-slate-700';
                     row.innerHTML = `
-                        <div class="flex items-center gap-2">
-                            <span class="text-lg">${emoji}</span>
-                            <span class="font-extrabold text-xs md:text-sm text-gray-800 dark:text-white">${word}</span>
-                            ${hasSound 
-                                ? `<span class="text-[10px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full font-bold">Som gravado</span>` 
-                                : `<span class="text-[10px] bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded-full font-bold">Sem som</span>`
-                            }
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="text-lg">${hasSound ? soundObj.emoji : '🔊'}</span>
+                            <span class="font-extrabold text-sm text-gray-800 dark:text-white truncate">${word}</span>
+                            ${hasSound ? '<span class="text-[10px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full font-bold">Pronto</span>' : ''}
                         </div>
-                        <div class="flex items-center gap-1.5">
-                            <!-- Botão circular branco com borda vermelha para gravar direto na palavra -->
-                            <button type="button" onclick="recordForBookWord('${word}')" title="Gravar som (máx 4s) para ${word}" class="w-8 h-8 rounded-full bg-white border-2 border-red-500 flex items-center justify-center shadow hover:scale-110 transition-transform ${isRecordingThis ? 'rec-active' : ''}">
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <button type="button" onclick="recordForBookWord('${word}')" title="Gravar som (4s)" class="w-9 h-9 rounded-full bg-white border-2 border-red-500 flex items-center justify-center shadow ${isRecordingThis ? 'rec-active' : ''}">
                                 <span class="w-3.5 h-3.5 ${isRecordingThis ? 'rounded-sm scale-75' : 'rounded-full'} bg-red-500 block"></span>
                             </button>
                             ${hasSound ? `
-                                <button type="button" onclick="playSpecificSound('${currentBook.id}', '${word}')" class="px-2 py-1 rounded-lg bg-purple-100 dark:bg-slate-700 text-xs font-bold" title="Ouvir">▶️</button>
-                                <button type="button" onclick="moveBookSoundToGlobal('${currentBook.id}', '${word}')" class="px-2 py-1 rounded-lg bg-indigo-100 dark:bg-indigo-900/80 text-indigo-700 dark:text-indigo-200 text-[10px] font-bold hover:bg-indigo-200" title="Mover para todos os livros">🌍 Mover p/ Todos</button>
-                                <button type="button" onclick="downloadSingleSound('${word}', '${currentBook.id}')" class="px-1.5 py-1 text-xs" title="Baixar som">⬇️</button>
+                                <button type="button" onclick="playSpecificSound('${currentBook.id}', '${word}')" class="p-1.5 rounded-xl bg-purple-100 dark:bg-slate-700 text-xs">▶️</button>
+                                <button type="button" onclick="moveBookSoundToGlobal('${currentBook.id}', '${word}')" class="px-2 py-1.5 rounded-xl bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-200 text-[10px] font-extrabold" title="Usar em todos os livros">🌍</button>
                             ` : ''}
-                            <button type="button" onclick="removeWordFromBook('${word}')" class="text-gray-400 hover:text-red-500 font-bold px-1.5 text-sm" title="Remover palavra">×</button>
+                            <button type="button" onclick="removeWordFromBook('${word}')" class="text-gray-400 hover:text-red-500 font-bold px-1.5 text-base">×</button>
                         </div>
                     `;
                     wordsList.appendChild(row);
@@ -984,17 +1004,11 @@
             }
         }
 
-        window.selectBook = selectBook;
-
         window.deleteBook = function(bookId) {
-            if (!booksLibrary[bookId]) return;
-            if (!confirm(`Deseja excluir o livro "${booksLibrary[bookId].title}" e os sons exclusivos dele?`)) return;
+            if (!booksLibrary[bookId] || !confirm(`Excluir o livro "${booksLibrary[bookId].title}"?`)) return;
             delete booksLibrary[bookId];
-            if (activeBookId === bookId) {
-                activeBookId = Object.keys(booksLibrary)[0] || '';
-            }
+            if (activeBookId === bookId) activeBookId = '';
             saveAllStorage();
-            updateActiveBookHeader();
             renderBookManagerUI();
         };
 
@@ -1002,34 +1016,27 @@
             if (!activeBookId || !booksLibrary[activeBookId]) return;
             const b = booksLibrary[activeBookId];
             b.plannedWords = (b.plannedWords || []).filter(w => w !== word);
-            if (b.sounds && b.sounds[word]) delete b.sounds[word];
+            if (b.sounds?.[word]) delete b.sounds[word];
             saveAllStorage();
             renderBookManagerUI();
             renderCustomSoundsUI();
         };
 
         function addWordsToActiveBook(wordsArray) {
-            if (!activeBookId) {
-                const createdId = createOrUpdateBookFromInput();
-                if (!createdId) return;
-            }
+            if (!activeBookId && !createOrUpdateBookFromInput()) return;
             const b = booksLibrary[activeBookId];
             if (!b.plannedWords) b.plannedWords = [];
-            let addedCount = 0;
+            let added = 0;
             wordsArray.forEach(raw => {
                 const clean = raw.trim().toLowerCase().replace(/[.,!?;:'"()[\]{}]/g, '');
-                if (clean.length >= 2 && !stopWords.has(clean)) {
-                    if (!b.plannedWords.includes(clean)) {
-                        b.plannedWords.push(clean);
-                        addedCount++;
-                    }
+                if (clean.length >= 2 && !stopWords.has(clean) && !b.plannedWords.includes(clean)) {
+                    b.plannedWords.push(clean);
+                    added++;
                 }
             });
             saveAllStorage();
             renderBookManagerUI();
-            if (addedCount > 0) {
-                document.getElementById('book-multiword-feedback').innerText = `✨ +${addedCount} palavra(s) cadastrada(s)! Toque no botão vermelho ao lado de cada palavra para gravar o som.`;
-            }
+            if (added > 0) document.getElementById('book-multiword-feedback').innerText = `✨ +${added} palavra(s)! Toque no círculo vermelho para gravar cada som.`;
         }
 
         document.getElementById('btn-add-manual-word').addEventListener('click', () => {
@@ -1039,7 +1046,6 @@
             inp.value = '';
         });
 
-        // Falar Várias Palavras no Cadastro do Livro
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         document.getElementById('btn-speak-multiple-words').addEventListener('click', () => {
             if (!SpeechRecognition) return alert('Seu navegador não suporta reconhecimento de voz.');
@@ -1058,44 +1064,33 @@
 
             multiWordRecognition.onstart = () => {
                 isCapturingMultiWords = true;
-                document.getElementById('multi-word-btn-text').innerText = 'Parar Escuta de Palavras';
-                document.getElementById('book-multiword-feedback').innerText = '🎙️ Fale várias palavras da história! Elas aparecerão na lista abaixo...';
+                document.getElementById('multi-word-btn-text').innerText = 'Parar Ditado';
+                document.getElementById('book-multiword-feedback').innerText = '🎙️ Fale as palavras do livro pausadamente...';
             };
-
             multiWordRecognition.onresult = (event) => {
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    if (event.results[i].isFinal) {
-                        const transcriptChunk = event.results[i][0].transcript;
-                        addWordsToActiveBook(transcriptChunk.split(/\s+/));
-                    }
+                    if (event.results[i].isFinal) addWordsToActiveBook(event.results[i][0].transcript.split(/\s+/));
                 }
             };
-
             multiWordRecognition.onend = () => {
                 isCapturingMultiWords = false;
-                document.getElementById('multi-word-btn-text').innerText = 'Falar Várias Palavras';
+                document.getElementById('multi-word-btn-text').innerText = 'Ditar Palavras';
             };
-
             multiWordRecognition.start();
         });
 
-        // Gravar som diretamente para uma palavra da lista do livro (4 segundos)
         window.recordForBookWord = async function(word) {
             if (!activeBookId || !booksLibrary[activeBookId]) return;
             if (isCapturingMultiWords && multiWordRecognition) {
                 isCapturingMultiWords = false;
                 try { multiWordRecognition.stop(); } catch(e) {}
             }
-
             if (inlineRecordingWord === word && isRecordingClip && mediaRecorder) {
                 mediaRecorder.stop();
                 return;
             }
-
             try {
-                if (!recordingStream) {
-                    recordingStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                }
+                if (!recordingStream) recordingStream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 audioChunks = [];
                 inlineRecordingWord = word;
                 renderBookManagerUI();
@@ -1105,8 +1100,7 @@
                 else if (MediaRecorder.isTypeSupported('audio/mp4')) options.mimeType = 'audio/mp4';
 
                 mediaRecorder = new MediaRecorder(recordingStream, options);
-                mediaRecorder.ondataavailable = (e) => { if (e.data && e.data.size > 0) audioChunks.push(e.data); };
-
+                mediaRecorder.ondataavailable = (e) => { if (e.data?.size > 0) audioChunks.push(e.data); };
                 mediaRecorder.onstop = () => {
                     isRecordingClip = false;
                     inlineRecordingWord = null;
@@ -1115,73 +1109,34 @@
                     const reader = new FileReader();
                     reader.onloadend = () => {
                         if (!booksLibrary[activeBookId].sounds) booksLibrary[activeBookId].sounds = {};
-                        booksLibrary[activeBookId].sounds[word] = {
-                            audioSrc: reader.result,
-                            emoji: '🔊'
-                        };
+                        booksLibrary[activeBookId].sounds[word] = { audioSrc: reader.result, emoji: '🔊' };
                         soundMode = 'custom';
                         saveAllStorage();
-                        updateModeButtonsUI();
                         renderBookManagerUI();
                         playSpecificSound(activeBookId, word);
-                        document.getElementById('book-multiword-feedback').innerText = `✅ Som gravado para "${word}" no livro "${booksLibrary[activeBookId].title}"!`;
+                        document.getElementById('book-multiword-feedback').innerText = `✅ Som de "${word}" gravado!`;
                     };
                     reader.readAsDataURL(audioBlob);
                 };
-
                 mediaRecorder.start();
                 isRecordingClip = true;
-                document.getElementById('book-multiword-feedback').innerText = `🔴 Gravando som para "${word}" (máx 4s)... Toque novamente para parar.`;
-
-                recTimer = setTimeout(() => {
-                    if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
-                }, MAX_REC_TIME_MS);
+                document.getElementById('book-multiword-feedback').innerText = `🔴 Gravando "${word}" (4s)...`;
+                recTimer = setTimeout(() => { if (mediaRecorder?.state === 'recording') mediaRecorder.stop(); }, MAX_REC_TIME_MS);
             } catch (err) {
                 inlineRecordingWord = null;
-                alert('Permita o acesso ao microfone para gravar o som!');
+                alert('Permita o acesso ao microfone para gravar!');
             }
         };
 
-        function openBookManagerModal() {
-            if (isListening) {
-                isListening = false;
-                try { recognition.stop(); } catch(e) {}
-            }
-            renderBookManagerUI();
-            bookModal.classList.remove('hidden');
-            bookModal.classList.add('flex');
-            gsap.fromTo(bookModal, { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1, duration: 0.25 });
-        }
-
-        function closeBookManagerModal() {
-            if (isCapturingMultiWords && multiWordRecognition) {
-                isCapturingMultiWords = false;
-                try { multiWordRecognition.stop(); } catch(e) {}
-            }
-            stopStudioMicStream();
-            gsap.to(bookModal, {
-                opacity: 0, scale: 0.95, duration: 0.2, onComplete: () => {
-                    bookModal.classList.add('hidden');
-                    bookModal.classList.remove('flex');
-                }
-            });
-        }
-
-        document.getElementById('btn-open-book-modal').addEventListener('click', openBookManagerModal);
-        document.getElementById('btn-close-book-modal').addEventListener('click', closeBookManagerModal);
         document.getElementById('btn-confirm-book-and-read').addEventListener('click', () => {
             if (bookTitleInput.value.trim() && (!activeBookId || booksLibrary[activeBookId]?.title !== bookTitleInput.value.trim())) {
                 createOrUpdateBookFromInput();
             }
-            if (!activeBookId) {
-                alert('Cadastre ou selecione um livro primeiro!');
-                return;
-            }
-            closeBookManagerModal();
+            navigateTo('reader');
         });
 
         // =========================================================================
-        // 8. ESTÚDIO DE GRAVAÇÃO + ESCOLHA DE ESCOPO (LIVRO ESPECÍFICO X GLOBAL)
+        // 8. ESTÚDIO DE GRAVAÇÃO RÁPIDA + ESCOLHA DE ESCOPO
         // =========================================================================
         const studioModal = document.getElementById('custom-sounds-studio');
         const btnRecord = document.getElementById('btn-record-sound');
@@ -1200,7 +1155,7 @@
         let recordingStream = null;
         let autoWordRecognition = null;
         let capturedSpokenWord = '';
-        let pendingSoundData = null; // Guarda { word, emoji, base64Audio } enquanto o usuário escolhe Livro vs Global
+        let pendingSoundData = null;
         const MAX_REC_TIME_MS = 4000;
 
         function setStudioFeedback(msg, isError = false) {
@@ -1210,26 +1165,19 @@
 
         function stopStudioMicStream() {
             if (recordingStream) {
-                recordingStream.getTracks().forEach(track => track.stop());
+                recordingStream.getTracks().forEach(t => t.stop());
                 recordingStream = null;
             }
-            if (autoWordRecognition) {
-                try { autoWordRecognition.stop(); } catch(e) {}
-            }
+            if (autoWordRecognition) { try { autoWordRecognition.stop(); } catch(e) {} }
         }
 
         window.openStudioForWord = function(prefillWord) {
-            if (isListening) {
-                isListening = false;
-                try { recognition.stop(); } catch(e) {}
-            }
-            if (prefillWord) {
-                document.getElementById('studio-word').value = prefillWord;
-            }
+            if (isListening) { isListening = false; try { recognition.stop(); } catch(e) {} }
+            if (prefillWord) document.getElementById('studio-word').value = prefillWord;
+            renderCustomSoundsUI();
             studioModal.classList.remove('hidden');
             studioModal.classList.add('flex');
-            gsap.fromTo(studioModal, { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1, duration: 0.25 });
-            setStudioFeedback(prefillWord ? `Grave o som para a palavra "${prefillWord}"!` : 'Toque no botão vermelho para gravar (máx 4s).');
+            setStudioFeedback(prefillWord ? `Grave o som para "${prefillWord}"!` : 'Toque no círculo vermelho para gravar (4s).');
         };
 
         document.getElementById('btn-open-studio').addEventListener('click', () => window.openStudioForWord(''));
@@ -1237,55 +1185,39 @@
         function closeStudioModal() {
             if (isRecordingClip && mediaRecorder) mediaRecorder.stop();
             stopStudioMicStream();
-            gsap.to(studioModal, {
-                opacity: 0, scale: 0.95, duration: 0.2, onComplete: () => {
-                    studioModal.classList.add('hidden');
-                    studioModal.classList.remove('flex');
-                }
-            });
+            studioModal.classList.add('hidden');
+            studioModal.classList.remove('flex');
         }
 
         document.getElementById('btn-close-studio').addEventListener('click', closeStudioModal);
-
         document.getElementById('btn-finish-studio-and-read').addEventListener('click', () => {
             soundMode = 'custom';
-            updateModeButtonsUI();
             closeStudioModal();
-            setTimeout(() => {
-                startReadingSession();
-            }, 300);
+            navigateTo('reader');
         });
 
-        window.selectEmoji = function(emoji) {
-            document.getElementById('studio-emoji').value = emoji;
-        };
+        window.selectEmoji = (emoji) => { document.getElementById('studio-emoji').value = emoji; };
 
         document.getElementById('btn-dictate-word').addEventListener('click', () => {
             if (!SpeechRecognition) return alert('Seu navegador não suporta ditado por voz.');
             const dictateRec = new SpeechRecognition();
             dictateRec.lang = 'pt-BR';
-            dictateRec.interimResults = false;
-            setStudioFeedback('🗣️ Fale agora a palavra-gatilho...');
+            setStudioFeedback('🗣️ Fale a palavra-gatilho...');
             dictateRec.onresult = (e) => {
                 const spoken = e.results[0][0].transcript.trim().toLowerCase().replace(/[.,!?;:'"]/g, '').split(/\s+/)[0];
                 document.getElementById('studio-word').value = spoken;
-                setStudioFeedback(`Palavra definida: "${spoken}". Toque no botão para gravar!`);
+                setStudioFeedback(`Palavra: "${spoken}". Toque para gravar!`);
             };
-            dictateRec.onerror = () => setStudioFeedback('Não consegui ouvir a palavra. Tente digitar.', true);
             dictateRec.start();
         });
 
         btnRecord.addEventListener('click', async () => {
             if (isRecordingClip) {
-                if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
+                if (mediaRecorder?.state === 'recording') mediaRecorder.stop();
                 return;
             }
-
             try {
-                if (!recordingStream) {
-                    recordingStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                }
-
+                if (!recordingStream) recordingStream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 audioChunks = [];
                 capturedSpokenWord = '';
                 const typedWord = document.getElementById('studio-word').value.trim().toLowerCase();
@@ -1294,8 +1226,6 @@
                     try {
                         autoWordRecognition = new SpeechRecognition();
                         autoWordRecognition.lang = 'pt-BR';
-                        autoWordRecognition.continuous = false;
-                        autoWordRecognition.interimResults = true;
                         autoWordRecognition.onresult = (ev) => {
                             const t = ev.results[0][0].transcript.trim().toLowerCase().replace(/[.,!?;:'"]/g, '');
                             if (t) capturedSpokenWord = t.split(/\s+/)[0];
@@ -1309,27 +1239,21 @@
                 else if (MediaRecorder.isTypeSupported('audio/mp4')) options.mimeType = 'audio/mp4';
 
                 mediaRecorder = new MediaRecorder(recordingStream, options);
-                mediaRecorder.ondataavailable = (e) => { if (e.data && e.data.size > 0) audioChunks.push(e.data); };
-
+                mediaRecorder.ondataavailable = (e) => { if (e.data?.size > 0) audioChunks.push(e.data); };
                 mediaRecorder.onstop = () => {
                     isRecordingClip = false;
                     clearTimeout(recTimer);
                     clearInterval(recInterval);
-                    if (autoWordRecognition) {
-                        try { autoWordRecognition.stop(); } catch(e) {}
-                    }
+                    if (autoWordRecognition) { try { autoWordRecognition.stop(); } catch(e) {} }
 
                     btnRecord.classList.remove('rec-active');
                     recInnerCircle.classList.replace('rounded-sm', 'rounded-full');
                     recInnerCircle.classList.remove('scale-75');
                     recProgressContainer.classList.add('hidden');
-                    recProgressBar.style.width = '0%';
 
                     const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
                     const reader = new FileReader();
-                    reader.onloadend = () => {
-                        askScopeAndSaveRecordedSound(reader.result);
-                    };
+                    reader.onloadend = () => askScopeAndSaveRecordedSound(reader.result);
                     reader.readAsDataURL(audioBlob);
                 };
 
@@ -1341,136 +1265,83 @@
                 recProgressContainer.classList.remove('hidden');
 
                 let elapsed = 0;
-                setStudioFeedback('🎙️ Gravando (4.0s)... Toque novamente para parar.');
-
                 recInterval = setInterval(() => {
                     elapsed += 100;
-                    const remaining = Math.max(0, (MAX_REC_TIME_MS - elapsed) / 1000).toFixed(1);
-                    const pct = Math.min(100, (elapsed / MAX_REC_TIME_MS) * 100);
-                    recProgressBar.style.width = `${pct}%`;
-                    setStudioFeedback(`🎙️ Gravando (${remaining}s)...`);
+                    recProgressBar.style.width = `${Math.min(100, (elapsed / MAX_REC_TIME_MS) * 100)}%`;
+                    setStudioFeedback(`🔴 Gravando (${Math.max(0, (MAX_REC_TIME_MS - elapsed) / 1000).toFixed(1)}s)...`);
                 }, 100);
 
-                recTimer = setTimeout(() => {
-                    if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
-                }, MAX_REC_TIME_MS);
-
+                recTimer = setTimeout(() => { if (mediaRecorder?.state === 'recording') mediaRecorder.stop(); }, MAX_REC_TIME_MS);
             } catch (err) {
-                console.error(err);
-                setStudioFeedback('Permita o acesso ao microfone para gravar seus sons!', true);
+                setStudioFeedback('Permita o microfone para gravar!', true);
             }
         });
 
-        // Ao finalizar a gravação, pede para o usuário escolher se o som será para um Livro Cadastrado ou para Todas as Leituras
         function askScopeAndSaveRecordedSound(base64Audio) {
-            let word = document.getElementById('studio-word').value.trim().toLowerCase().replace(/[.,!?;:'"]/g, '');
+            let word = document.getElementById('studio-word').value.trim().toLowerCase().replace(/[.,!?;:'"]/g, '') || capturedSpokenWord;
             const emoji = document.getElementById('studio-emoji').value.trim() || '🔊';
 
-            if (!word) word = capturedSpokenWord;
             if (!word) {
-                const prompted = prompt('Som gravado! Qual palavra da história vai ativar este som? (ex: espada, monstro, lobo)');
-                if (!prompted || !prompted.trim()) {
-                    setStudioFeedback('Gravação descartada porque nenhuma palavra foi informada.', true);
-                    return;
-                }
+                const prompted = prompt('Qual palavra vai ativar este som?');
+                if (!prompted?.trim()) return setStudioFeedback('Gravação descartada.', true);
                 word = prompted.trim().toLowerCase().replace(/[.,!?;:'"]/g, '');
             }
 
             pendingSoundData = { word, emoji, base64Audio };
-
-            // Preenche o select de livros cadastrados no modal de escopo
             const bookIds = Object.keys(booksLibrary);
             scopeBookSelect.innerHTML = '';
-            if (bookIds.length === 0) {
+            bookIds.forEach(id => {
                 const opt = document.createElement('option');
-                opt.value = 'NEW_BOOK';
-                opt.innerText = '+ Cadastrar novo livro agora...';
+                opt.value = id;
+                opt.innerText = `📘 ${booksLibrary[id].title}`;
+                if (id === activeBookId) opt.selected = true;
                 scopeBookSelect.appendChild(opt);
-            } else {
-                bookIds.forEach(id => {
-                    const opt = document.createElement('option');
-                    opt.value = id;
-                    opt.innerText = `📘 ${booksLibrary[id].title}`;
-                    if (id === activeBookId) opt.selected = true;
-                    scopeBookSelect.appendChild(opt);
-                });
-                const optNew = document.createElement('option');
-                optNew.value = 'NEW_BOOK';
-                optNew.innerText = '+ Cadastrar em um novo livro...';
-                scopeBookSelect.appendChild(optNew);
-            }
+            });
+            const optNew = document.createElement('option');
+            optNew.value = 'NEW_BOOK';
+            optNew.innerText = '+ Criar novo livro...';
+            scopeBookSelect.appendChild(optNew);
 
-            document.getElementById('scope-modal-desc').innerHTML = `Onde o som da palavra <strong>"${word}" (${emoji})</strong> será utilizado?`;
+            document.getElementById('scope-modal-desc').innerHTML = `Palavra: <strong>"${word}" (${emoji})</strong>`;
             scopeChoiceModal.classList.remove('hidden');
             scopeChoiceModal.classList.add('flex');
         }
 
-        // Salvar no Livro Escolhido
         document.getElementById('btn-save-scope-book').addEventListener('click', () => {
             if (!pendingSoundData) return;
             let targetBookId = scopeBookSelect.value;
-
             if (targetBookId === 'NEW_BOOK' || !booksLibrary[targetBookId]) {
-                const newTitle = prompt('Digite o nome do livro para cadastrar:');
-                if (!newTitle || !newTitle.trim()) return;
+                const newTitle = prompt('Nome do novo livro:');
+                if (!newTitle?.trim()) return;
                 targetBookId = 'book_' + Date.now();
-                booksLibrary[targetBookId] = {
-                    id: targetBookId,
-                    title: newTitle.trim(),
-                    transcript: '',
-                    plannedWords: [pendingSoundData.word],
-                    sounds: {}
-                };
+                booksLibrary[targetBookId] = { id: targetBookId, title: newTitle.trim(), transcript: '', plannedWords: [pendingSoundData.word], sounds: {} };
                 activeBookId = targetBookId;
             }
-
-            const targetBook = booksLibrary[targetBookId];
-            if (!targetBook.sounds) targetBook.sounds = {};
-            targetBook.sounds[pendingSoundData.word] = {
-                audioSrc: pendingSoundData.base64Audio,
-                emoji: pendingSoundData.emoji
-            };
-
-            try {
-                saveAllStorage();
-                document.getElementById('studio-word').value = '';
-                soundMode = 'custom';
-                updateActiveBookHeader();
-                updateModeButtonsUI();
-                playSpecificSound(targetBookId, pendingSoundData.word);
-                setStudioFeedback(`✅ Som "${pendingSoundData.word}" salvo no livro "${targetBook.title}"!`);
-            } catch (err) {
-                alert('Memória do navegador cheia! Apague alguns sons antigos.');
-            }
-
+            if (!booksLibrary[targetBookId].sounds) booksLibrary[targetBookId].sounds = {};
+            booksLibrary[targetBookId].sounds[pendingSoundData.word] = { audioSrc: pendingSoundData.base64Audio, emoji: pendingSoundData.emoji };
+            saveAllStorage();
+            document.getElementById('studio-word').value = '';
+            soundMode = 'custom';
+            updateModeButtonsUI();
+            renderBookManagerUI();
+            playSpecificSound(targetBookId, pendingSoundData.word);
+            setStudioFeedback(`✅ Salvo no livro "${booksLibrary[targetBookId].title}"!`);
             pendingSoundData = null;
             scopeChoiceModal.classList.add('hidden');
             scopeChoiceModal.classList.remove('flex');
         });
 
-        // Salvar para Todas as Leituras (Global)
         document.getElementById('btn-save-scope-global').addEventListener('click', () => {
             if (!pendingSoundData) return;
             const { word, emoji, base64Audio } = pendingSoundData;
-
-            if (globalCustomSounds[word]) {
-                if (!confirm(`⚠️ Já existe um som para "${word}" salvo para todas as leituras. Deseja sobrescrever?`)) {
-                    return;
-                }
-            }
-
-            try {
-                globalCustomSounds[word] = { audioSrc: base64Audio, emoji: emoji };
-                saveAllStorage();
-                document.getElementById('studio-word').value = '';
-                soundMode = 'custom';
-                updateModeButtonsUI();
-                playSpecificSound('GLOBAL', word);
-                setStudioFeedback(`✅ Som "${word}" salvo para TODAS as leituras!`);
-            } catch (err) {
-                alert('Memória do navegador cheia! Apague alguns sons antigos.');
-            }
-
+            if (globalCustomSounds[word] && !confirm(`Sobrescrever o som global de "${word}"?`)) return;
+            globalCustomSounds[word] = { audioSrc: base64Audio, emoji };
+            saveAllStorage();
+            document.getElementById('studio-word').value = '';
+            soundMode = 'custom';
+            updateModeButtonsUI();
+            playSpecificSound('GLOBAL', word);
+            setStudioFeedback(`✅ Salvo para todos os livros!`);
             pendingSoundData = null;
             scopeChoiceModal.classList.add('hidden');
             scopeChoiceModal.classList.remove('flex');
@@ -1480,56 +1351,32 @@
             pendingSoundData = null;
             scopeChoiceModal.classList.add('hidden');
             scopeChoiceModal.classList.remove('flex');
-            setStudioFeedback('Gravação cancelada.');
         });
 
         document.getElementById('studio-file-upload').addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            if (file.size > 1.5 * 1024 * 1024) {
-                alert('Escolha um áudio curto menor que 1.5MB.');
-                return;
-            }
+            if (file.size > 1.5 * 1024 * 1024) return alert('Escolha um áudio menor que 1.5MB.');
             const wordInput = document.getElementById('studio-word');
-            if (!wordInput.value.trim()) {
-                const cleanFileName = file.name.replace(/\.[^/.]+$/, "").toLowerCase().replace(/[-_]/g, " ");
-                wordInput.value = cleanFileName;
-            }
+            if (!wordInput.value.trim()) wordInput.value = file.name.replace(/\.[^/.]+$/, "").toLowerCase().replace(/[-_]/g, " ");
             const reader = new FileReader();
-            reader.onload = (ev) => {
-                askScopeAndSaveRecordedSound(ev.target.result);
-                e.target.value = '';
-            };
+            reader.onload = (ev) => { askScopeAndSaveRecordedSound(ev.target.result); e.target.value = ''; };
             reader.readAsDataURL(file);
         });
 
         // =========================================================================
-        // 9. RECONHECIMENTO DE VOZ DA LEITURA E NUVEM DE PALAVRAS POR LIVRO
+        // 9. LEITURA POR VOZ & NUVEM DE PALAVRAS
         // =========================================================================
         let recognition;
         let isListening = false;
         let wordCooldowns = {};
         let fullReadingTranscript = '';
         let pendingInterimText = '';
-        let triggeredWordsSet = new Set();
 
         const animaArea = document.getElementById('anima-area');
         const listeningIndicator = document.getElementById('listening-indicator');
         const wordcloudSection = document.getElementById('wordcloud-section');
         const btnClearTranscript = document.getElementById('btn-clear-transcript');
-
-        function toggleImmersiveMode(active) {
-            if (active) {
-                wordcloudSection.classList.add('hidden');
-                animaArea.classList.replace('h-48', 'h-64');
-                animaArea.classList.add('md:h-80');
-                listeningIndicator.classList.remove('opacity-0');
-            } else {
-                animaArea.classList.replace('h-64', 'h-48');
-                animaArea.classList.remove('md:h-80');
-                listeningIndicator.classList.add('opacity-0');
-            }
-        }
 
         const stopWords = new Set([
             'a', 'o', 'e', 'é', 'de', 'do', 'da', 'dos', 'das', 'em', 'no', 'na', 'nos', 'nas',
@@ -1547,62 +1394,30 @@
                 document.getElementById('interim-text').innerText = '';
                 pendingInterimText = '';
             }
-
-            // Salva o histórico de leitura dentro do livro ativo
-            if (activeBookId && booksLibrary[activeBookId]) {
-                booksLibrary[activeBookId].transcript = fullReadingTranscript.trim();
-                saveAllStorage();
-            }
+            if (activeBookId && booksLibrary[activeBookId]) booksLibrary[activeBookId].transcript = fullReadingTranscript.trim();
+            else freeReadingTranscript = fullReadingTranscript.trim();
+            saveAllStorage();
 
             const rawText = fullReadingTranscript.trim();
-            if (!rawText) {
-                wordcloudSection.classList.add('hidden');
-                return;
-            }
+            if (!rawText) return wordcloudSection.classList.add('hidden');
 
-            const cleanWords = rawText
-                .toLowerCase()
-                .replace(/[.,!?;:'"()[\]{}]/g, '')
-                .split(/\s+/)
-                .filter(w => w.length >= 2 && !stopWords.has(w));
-
+            const cleanWords = rawText.toLowerCase().replace(/[.,!?;:'"()[\]{}]/g, '').split(/\s+/).filter(w => w.length >= 2 && !stopWords.has(w));
             if (cleanWords.length === 0) return;
 
             const freqMap = {};
             let maxCount = 1;
-            cleanWords.forEach(w => {
-                freqMap[w] = (freqMap[w] || 0) + 1;
-                if (freqMap[w] > maxCount) maxCount = freqMap[w];
-            });
+            cleanWords.forEach(w => { freqMap[w] = (freqMap[w] || 0) + 1; if (freqMap[w] > maxCount) maxCount = freqMap[w]; });
 
-            const sortedWords = Object.keys(freqMap)
-                .sort((a, b) => freqMap[b] - freqMap[a])
-                .slice(0, 35);
-
+            const sortedWords = Object.keys(freqMap).sort((a, b) => freqMap[b] - freqMap[a]).slice(0, 30);
             const canvas = document.getElementById('wordcloud-canvas');
-            const stats = document.getElementById('wordcloud-stats');
             canvas.innerHTML = '';
 
-            const bookTitle = (activeBookId && booksLibrary[activeBookId]) ? booksLibrary[activeBookId].title : 'Leitura';
-            const totalWordsCount = rawText.split(/\s+/).filter(Boolean).length;
-            stats.innerText = `Livro "${bookTitle}": ${totalWordsCount} palavras lidas • ${sortedWords.length} termos em destaque`;
+            document.getElementById('wordcloud-stats').innerText = `${rawText.split(/\s+/).filter(Boolean).length} palavras lidas`;
+            const colors = ['text-purple-600 dark:text-purple-400', 'text-indigo-600 dark:text-indigo-400', 'text-pink-600 dark:text-pink-400', 'text-emerald-600 dark:text-emerald-400'];
 
-            const colors = [
-                'text-purple-600 dark:text-purple-400',
-                'text-indigo-600 dark:text-indigo-400',
-                'text-pink-600 dark:text-pink-400',
-                'text-emerald-600 dark:text-emerald-400',
-                'text-amber-600 dark:text-amber-400',
-                'text-sky-600 dark:text-sky-400'
-            ];
-
-            const cloudItems = sortedWords.sort(() => Math.random() - 0.5);
-
-            cloudItems.forEach((word, idx) => {
+            sortedWords.sort(() => Math.random() - 0.5).forEach((word, idx) => {
                 const count = freqMap[word];
-                const ratio = maxCount > 1 ? (count - 1) / (maxCount - 1) : 0.5;
-                const fontSizeRem = (0.85 + ratio * 1.35).toFixed(2);
-
+                const fontSizeRem = (0.85 + (maxCount > 1 ? (count - 1) / (maxCount - 1) : 0.5) * 1.1).toFixed(2);
                 let soundKey = word;
                 let resolved = resolveSoundWithHierarchy(soundKey);
                 if (!resolved) {
@@ -1610,60 +1425,34 @@
                     else if (soundKey.endsWith('s')) soundKey = soundKey.slice(0, -1);
                     resolved = resolveSoundWithHierarchy(soundKey);
                 }
-
                 const hasSound = Boolean(resolved);
-                const emojiPrefix = hasSound ? `${resolved.emoji} ` : '';
 
                 const wrapper = document.createElement('div');
-                wrapper.className = `word-cloud-item inline-flex items-center gap-1 px-2 py-0.5 rounded-xl transition-transform hover:scale-105 ${hasSound ? 'bg-white/85 dark:bg-slate-800 shadow-sm border border-purple-200 dark:border-slate-600' : ''}`;
+                wrapper.className = `inline-flex items-center gap-1 px-2 py-0.5 rounded-xl ${hasSound ? 'bg-white dark:bg-slate-800 shadow-sm border border-purple-200 dark:border-slate-600' : ''}`;
 
                 const wordBtn = document.createElement('button');
                 wordBtn.type = 'button';
                 wordBtn.style.fontSize = `${fontSizeRem}rem`;
-                wordBtn.className = `font-extrabold leading-tight ${colors[idx % colors.length]}`;
-                wordBtn.innerText = `${emojiPrefix}${word}${count > 1 ? ` (${count})` : ''}`;
-                wordBtn.onclick = () => {
-                    if (hasSound) triggerEffect(soundKey);
-                    else window.openStudioForWord(word);
-                };
-
-                const recQuickBtn = document.createElement('button');
-                recQuickBtn.type = 'button';
-                recQuickBtn.className = 'text-[11px] opacity-60 hover:opacity-100 hover:scale-125 transition-all';
-                recQuickBtn.title = `Gravar novo som para "${word}"`;
-                recQuickBtn.innerText = '🎙️';
-                recQuickBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    window.openStudioForWord(word);
-                };
+                wordBtn.className = `font-extrabold ${colors[idx % colors.length]}`;
+                wordBtn.innerText = `${hasSound ? resolved.emoji + ' ' : ''}${word}`;
+                wordBtn.onclick = () => hasSound ? triggerEffect(soundKey) : window.openStudioForWord(word);
 
                 wrapper.appendChild(wordBtn);
-                wrapper.appendChild(recQuickBtn);
                 canvas.appendChild(wrapper);
             });
 
             wordcloudSection.classList.remove('hidden');
             btnClearTranscript.classList.remove('hidden');
-
-            gsap.fromTo('.word-cloud-item', 
-                { opacity: 0, scale: 0.4, y: 15 }, 
-                { opacity: 1, scale: 1, y: 0, duration: 0.45, stagger: 0.02, ease: "back.out(1.7)" }
-            );
         }
 
-        document.getElementById('btn-close-wordcloud').addEventListener('click', () => {
-            wordcloudSection.classList.add('hidden');
-        });
+        document.getElementById('btn-close-wordcloud').addEventListener('click', () => wordcloudSection.classList.add('hidden'));
 
         btnClearTranscript.addEventListener('click', () => {
-            if (!confirm('Deseja limpar o histórico de palavras lidas deste livro?')) return;
             fullReadingTranscript = '';
             pendingInterimText = '';
-            triggeredWordsSet.clear();
-            if (activeBookId && booksLibrary[activeBookId]) {
-                booksLibrary[activeBookId].transcript = '';
-                saveAllStorage();
-            }
+            if (activeBookId && booksLibrary[activeBookId]) booksLibrary[activeBookId].transcript = '';
+            else freeReadingTranscript = '';
+            saveAllStorage();
             document.getElementById('final-text').innerText = '';
             document.getElementById('interim-text').innerText = '';
             wordcloudSection.classList.add('hidden');
@@ -1672,28 +1461,27 @@
 
         if (SpeechRecognition) {
             recognition = new SpeechRecognition();
-            recognition.continuous = true; 
-            recognition.interimResults = true; 
-            recognition.lang = 'pt-BR'; 
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'pt-BR';
 
             recognition.onstart = () => {
                 isListening = true;
                 stopStudioMicStream();
-                requestWakeLock(); 
-                
+                requestWakeLock();
                 const btn = document.getElementById('btn-mic');
                 btn.classList.add('mic-active', 'bg-slate-800', 'dark:bg-slate-700');
-                btn.classList.remove('bg-gradient-to-r', 'from-purple-600', 'to-indigo-600', 'hover:scale-105');
-                document.getElementById('btn-text').innerText = 'Finalizar Leitura e Ver Nuvem';
-                document.getElementById('status').innerText = 'Gravando leitura... 🎙️';
-                
-                toggleImmersiveMode(true);
+                btn.classList.remove('bg-gradient-to-r', 'from-purple-600', 'to-indigo-600');
+                document.getElementById('btn-text').innerText = 'Finalizar Leitura';
+                document.getElementById('status').innerText = 'Ouvindo história... 🎙️';
+                wordcloudSection.classList.add('hidden');
+                listeningIndicator.classList.remove('opacity-0');
             };
 
             recognition.onerror = (event) => {
-                if(event.error === 'not-allowed') {
+                if (event.error === 'not-allowed') {
                     isListening = false;
-                    alert('Permita o acesso ao microfone no navegador para a mágica funcionar!');
+                    alert('Permita o acesso ao microfone no navegador!');
                 }
             };
 
@@ -1701,13 +1489,13 @@
                 if (isListening) {
                     try { recognition.start(); } catch(e) {}
                 } else {
-                    releaseWakeLock(); 
+                    releaseWakeLock();
                     const btn = document.getElementById('btn-mic');
                     btn.classList.remove('mic-active', 'bg-slate-800', 'dark:bg-slate-700');
-                    btn.classList.add('bg-gradient-to-r', 'from-purple-600', 'to-indigo-600', 'hover:scale-105');
-                    document.getElementById('btn-text').innerText = 'Iniciar Leitura do Livro';
-                    document.getElementById('status').innerText = 'Leitura finalizada ✨';
-                    toggleImmersiveMode(false);
+                    btn.classList.add('bg-gradient-to-r', 'from-purple-600', 'to-indigo-600');
+                    document.getElementById('btn-text').innerText = 'Iniciar Leitura';
+                    document.getElementById('status').innerText = 'Leitura concluída ✨';
+                    listeningIndicator.classList.add('opacity-0');
                     generateWordCloud();
                 }
             };
@@ -1715,22 +1503,19 @@
             recognition.onresult = (event) => {
                 let interimText = '';
                 let finalSentence = '';
-
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
                     const wordText = event.results[i][0].transcript;
                     if (event.results[i].isFinal) {
                         finalSentence += wordText + ' ';
                         fullReadingTranscript += wordText + ' ';
                         document.getElementById('final-text').innerText = fullReadingTranscript;
-                        if (activeBookId && booksLibrary[activeBookId]) {
-                            booksLibrary[activeBookId].transcript = fullReadingTranscript.trim();
-                            saveAllStorage();
-                        }
+                        if (activeBookId && booksLibrary[activeBookId]) booksLibrary[activeBookId].transcript = fullReadingTranscript.trim();
+                        else freeReadingTranscript = fullReadingTranscript.trim();
+                        saveAllStorage();
                     } else {
                         interimText += wordText;
                     }
                 }
-                
                 pendingInterimText = interimText;
                 document.getElementById('interim-text').innerText = interimText;
                 btnClearTranscript.classList.remove('hidden');
@@ -1744,129 +1529,77 @@
             };
         }
 
-        // 10. Processamento de Palavras com a Hierarquia (1º Livro -> 2º Global -> 3º App)
         function processWords(sentence) {
-            const cleanSentence = sentence.toLowerCase().replace(/[.,!?;:'"]/g, '');
-            const words = cleanSentence.split(/\s+/);
+            const words = sentence.toLowerCase().replace(/[.,!?;:'"]/g, '').split(/\s+/);
             const now = Date.now();
-
             words.forEach(word => {
                 if (!word) return;
                 let targetWord = word;
                 let resolvedItem = resolveSoundWithHierarchy(targetWord);
-
                 if (!resolvedItem) {
                     if (targetWord === 'leões' || targetWord === 'leoes') targetWord = 'leão';
                     else if (targetWord.endsWith('s')) targetWord = targetWord.slice(0, -1);
                     resolvedItem = resolveSoundWithHierarchy(targetWord);
                 }
-
-                if (resolvedItem) {
-                    if (!wordCooldowns[targetWord] || (now - wordCooldowns[targetWord] > 2500)) {
-                        wordCooldowns[targetWord] = now;
-                        triggeredWordsSet.add(targetWord);
-                        playSoundAndAnimate(targetWord, resolvedItem);
-                    }
+                if (resolvedItem && (!wordCooldowns[targetWord] || now - wordCooldowns[targetWord] > 2500)) {
+                    wordCooldowns[targetWord] = now;
+                    playSoundAndAnimate(targetWord, resolvedItem);
                 }
             });
         }
 
         window.triggerEffect = function(word) {
             unlockMobileAudio();
-            // No teste rápido, busca pela hierarquia (ou força busca completa caso esteja testando)
-            const resolved = resolveSoundWithHierarchy(word) 
+            const resolved = resolveSoundWithHierarchy(word)
                 || (activeBookId && booksLibrary[activeBookId]?.sounds?.[word])
-                || globalCustomSounds[word] 
+                || globalCustomSounds[word]
                 || baseLibrary[word];
-            if (resolved) {
-                playSoundAndAnimate(word, resolved);
-            }
+            if (resolved) playSoundAndAnimate(word, resolved);
         };
 
-        // 11. Reprodução de Áudio com Fallback Automático de Extensão
         function showAudioFeedback(msg) {
             const fb = document.getElementById('audio-feedback');
             fb.innerText = msg;
             fb.classList.remove('opacity-0');
             clearTimeout(fb.hideTimer);
-            fb.hideTimer = setTimeout(() => fb.classList.add('opacity-0'), 2800);
+            fb.hideTimer = setTimeout(() => fb.classList.add('opacity-0'), 2500);
         }
 
         function playSoundWithFallback(src, word, originLabel) {
             if (src.startsWith('data:')) {
                 globalAudio.onerror = null;
-                globalAudio.onplaying = () => showAudioFeedback(`🔊 ${originLabel || 'Som gravado'}: ${word}`);
+                globalAudio.onplaying = () => showAudioFeedback(`🔊 ${originLabel}: ${word}`);
                 globalAudio.src = src;
-                globalAudio.play().catch(err => console.error(err));
+                globalAudio.play().catch(() => {});
                 return;
             }
-
             const baseName = src.replace(/\.(mp3|wav|WAV)$/i, '');
             const fileNameOnly = baseName.split('/').pop();
             const capitalized = fileNameOnly.charAt(0).toUpperCase() + fileNameOnly.slice(1);
-            
-            const candidates = [
-                src,
-                `${baseName}.wav`,
-                `${baseName}.mp3`,
-                `${baseName}.WAV`,
-                `./audios/${capitalized}.mp3`,
-                `./audios/${capitalized}.wav`,
-                `./audios/${capitalized}.WAV`
-            ];
-            const uniqueCandidates = [...new Set(candidates)];
-            let attemptIndex = 0;
+            const candidates = [...new Set([src, `${baseName}.wav`, `${baseName}.mp3`, `${baseName}.WAV`, `./audios/${capitalized}.mp3`, `./audios/${capitalized}.wav`, `./audios/${capitalized}.WAV`])];
+            let idx = 0;
 
             function tryNext() {
-                if (attemptIndex >= uniqueCandidates.length) {
-                    showAudioFeedback(`⚠️ Áudio de "${word}" não encontrado`);
-                    return;
-                }
-                const currentCandidate = encodeURI(uniqueCandidates[attemptIndex]);
-                attemptIndex++;
-
+                if (idx >= candidates.length) return showAudioFeedback(`⚠️ Áudio de "${word}" não encontrado`);
+                const current = encodeURI(candidates[idx++]);
                 globalAudio.onerror = () => tryNext();
-                globalAudio.onplaying = () => showAudioFeedback(`🔊 ${originLabel || 'Tocando'}: ${word}`);
-
-                globalAudio.src = currentCandidate;
+                globalAudio.onplaying = () => showAudioFeedback(`🔊 ${originLabel}: ${word}`);
+                globalAudio.src = current;
                 globalAudio.load();
-                globalAudio.play().catch(() => {
-                    if (globalAudio.error) tryNext();
-                });
+                globalAudio.play().catch(() => { if (globalAudio.error) tryNext(); });
             }
-
             tryNext();
         }
 
         function playSoundAndAnimate(word, item) {
-            playSoundWithFallback(item.audioSrc, word, item.origin);
-
-            if (navigator.vibrate) navigator.vibrate(50); 
+            playSoundWithFallback(item.audioSrc, word, item.origin || 'Som');
+            if (navigator.vibrate) navigator.vibrate(50);
 
             const emojiEl = document.getElementById('emoji-display');
             emojiEl.innerText = item.emoji;
-            
             gsap.killTweensOf(emojiEl);
-            
-            gsap.fromTo(emojiEl, 
-                { opacity: 0, scale: 0, y: 50, rotation: Math.random() * 60 - 30 }, 
-                { opacity: 1, scale: 2.5, y: -20, rotation: 0, duration: 0.7, ease: "elastic.out(1, 0.5)" }
-            );
-            
-            gsap.to(emojiEl, {
-                opacity: 0, scale: 0.8, y: -60, duration: 0.4, delay: 2.5, ease: "power2.in"
-            });
-        }
-
-        // 12. Botão Principal de Iniciar/Finalizar Leitura (Exige Livro Cadastrado/Selecionado)
-        function startReadingSession() {
-            if (!activeBookId || !booksLibrary[activeBookId]) {
-                alert('📚 Antes de começar a leitura, cadastre ou escolha o nome do livro!');
-                openBookManagerModal();
-                return;
-            }
-            unlockMobileAudio();
-            try { recognition.start(); } catch(e) {}
+            gsap.fromTo(emojiEl, { opacity: 0, scale: 0, y: 50, rotation: Math.random() * 50 - 25 }, { opacity: 1, scale: 2.3, y: -15, rotation: 0, duration: 0.65, ease: "elastic.out(1, 0.5)" });
+            gsap.to(emojiEl, { opacity: 0, scale: 0.8, y: -55, duration: 0.4, delay: 2.4, ease: "power2.in" });
         }
 
         document.getElementById('btn-mic').addEventListener('click', () => {
@@ -1874,13 +1607,152 @@
                 isListening = false;
                 recognition.stop();
             } else {
-                startReadingSession();
+                unlockMobileAudio();
+                try { recognition.start(); } catch(e) {}
             }
         });
 
-        // Inicializa a interface carregando o último livro selecionado e sua nuvem de palavras
-        updateActiveBookHeader();
-        updateModeButtonsUI();
+        // =========================================================================
+        // 10. TOUR GUIADO INTERATIVO COM DESTAQUE (SPOTLIGHT)
+        // =========================================================================
+        const tourOverlay = document.getElementById('tour-overlay');
+        const tourSpotlight = document.getElementById('tour-spotlight');
+        const tourTooltip = document.getElementById('tour-tooltip');
+
+        const tourSteps = [
+            {
+                view: 'home',
+                target: '#btn-home-read-any',
+                title: '📖 Ler um livro qualquer',
+                desc: 'Quer começar rápido? Toque aqui para abrir o palco mágico e ler qualquer história em voz alta sem precisar cadastrar nada.'
+            },
+            {
+                view: 'home',
+                target: '#btn-home-register-book',
+                title: '✨ Cadastrar um livro',
+                desc: 'Crie livros personalizados com efeitos sonoros exclusivos feitos com a sua voz ou da criança (rugidos, risadas, trovões!).'
+            },
+            {
+                view: 'reader',
+                target: '#anima-area',
+                title: '🎭 Palco Mágico Interativo',
+                desc: 'Conforme você lê a história, o aplicativo reconhece palavras-chave (como leão, chuva, magia) e dispara animações e sons na hora.'
+            },
+            {
+                view: 'reader',
+                target: '#reader-sound-toggle',
+                title: '🎵 Sons do App vs 🎧 Meus Sons',
+                desc: 'Alterne entre os sons prontos do app ou os seus sons gravados. A prioridade é: 1º Som do Livro → 2º Som Global → 3º Som do App.'
+            },
+            {
+                view: 'reader',
+                target: '#btn-mic',
+                title: '🎙️ Iniciar e Finalizar Leitura',
+                desc: 'Toque aqui para ativar o microfone durante a leitura. Ao finalizar, o app gera automaticamente uma Nuvem de Palavras interativa!'
+            },
+            {
+                view: 'books',
+                target: '#book-editor-card',
+                title: '🗣️ Dite Várias Palavras de Uma Vez',
+                desc: 'Ao cadastrar um livro, dê um nome a ele e toque em "Ditar Palavras" para falar todos os gatilhos da história e gravar o som de cada um.'
+            },
+            {
+                view: 'books',
+                target: '#btn-open-studio',
+                title: '💾 Sons Globais e Lembranças',
+                desc: 'Aqui você grava sons rápidos para usar em todos os livros e pode baixar um arquivo .ZIP com todas as gravações para guardar de lembrança!'
+            }
+        ];
+
+        let currentTourIndex = 0;
+
+        function positionTourSpotlight() {
+            const step = tourSteps[currentTourIndex];
+            const targetEl = document.querySelector(step.target);
+            if (!targetEl) return;
+
+            targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            setTimeout(() => {
+                const rect = targetEl.getBoundingClientRect();
+                const pad = 8;
+
+                tourSpotlight.style.top = `${rect.top - pad}px`;
+                tourSpotlight.style.left = `${rect.left - pad}px`;
+                tourSpotlight.style.width = `${rect.width + pad * 2}px`;
+                tourSpotlight.style.height = `${rect.height + pad * 2}px`;
+
+                // Posiciona o balão explicativo abaixo ou acima do elemento destacado
+                const tooltipHeight = 200;
+                const spaceBelow = window.innerHeight - rect.bottom;
+                tourTooltip.style.left = '50%';
+                tourTooltip.style.transform = 'translateX(-50%)';
+
+                if (spaceBelow > tooltipHeight + 24) {
+                    tourTooltip.style.top = `${rect.bottom + pad + 14}px`;
+                    tourTooltip.style.bottom = 'auto';
+                } else {
+                    tourTooltip.style.top = 'auto';
+                    tourTooltip.style.bottom = `${window.innerHeight - rect.top + pad + 14}px`;
+                }
+            }, 120);
+        }
+
+        function renderTourStep() {
+            const step = tourSteps[currentTourIndex];
+            if (currentView !== step.view) {
+                navigateTo(step.view);
+            }
+
+            document.getElementById('tour-step-badge').innerText = `Passo ${currentTourIndex + 1} de ${tourSteps.length}`;
+            document.getElementById('tour-title').innerText = step.title;
+            document.getElementById('tour-desc').innerText = step.desc;
+
+            const btnPrev = document.getElementById('btn-tour-prev');
+            const btnNext = document.getElementById('btn-tour-next');
+
+            btnPrev.style.visibility = currentTourIndex === 0 ? 'hidden' : 'visible';
+            btnNext.innerText = currentTourIndex === tourSteps.length - 1 ? 'Concluir Tour ✨' : 'Próximo →';
+
+            positionTourSpotlight();
+        }
+
+        function startTour() {
+            currentTourIndex = 0;
+            tourOverlay.classList.remove('hidden');
+            renderTourStep();
+        }
+
+        function endTour() {
+            tourOverlay.classList.add('hidden');
+            navigateTo('home');
+        }
+
+        document.getElementById('btn-home-tour').addEventListener('click', startTour);
+        document.getElementById('btn-tour-skip').addEventListener('click', endTour);
+
+        document.getElementById('btn-tour-prev').addEventListener('click', () => {
+            if (currentTourIndex > 0) {
+                currentTourIndex--;
+                renderTourStep();
+            }
+        });
+
+        document.getElementById('btn-tour-next').addEventListener('click', () => {
+            if (currentTourIndex < tourSteps.length - 1) {
+                currentTourIndex++;
+                renderTourStep();
+            } else {
+                endTour();
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (!tourOverlay.classList.contains('hidden')) positionTourSpotlight();
+        });
+
+        // Inicialização
+        updateHomeSummary();
     </script>
 </body>
 </html>
